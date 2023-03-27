@@ -15,4 +15,5 @@ transcript
 
 # Ignore compiled objects
 bin/
+target/
 *.o
