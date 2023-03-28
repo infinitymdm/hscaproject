@@ -19,7 +19,9 @@ fn main() {
 
     // Round input numbers to correct precision
     let mut n = rne(n, internal_precision);
+    let n1 = n;
     let mut d = rne(d, internal_precision);
+    let d1 = d;
 
     // Determine actual quotient
     let q = n/d;
@@ -46,9 +48,22 @@ fn main() {
     // Computed answer
     let rd = flr(n, internal_precision);
 
-    println!("Actual Answer\nRQ = {:.15}", rq);
+    println!("\nActual Answer\nRQ = {:.15}", rq);
     // TODO: Display binary
-    println!("GDIV Answer\nRD = {:.15}", rd);
+    println!("GDIV Answer\nRD = {:.15}\n", rd);
+    // TODO: Display binary
+
+    // Error analysis
+    println!("Error Analysis");
+    println!("error = {:.15}", (rq-rd).abs());
+    println!("#bits = {:.15}\n", (rq-rd).abs().log2());
+
+    // Remainder
+    let rem = 2_f64.powi(internal_precision) * (n1 - rd*d1);
+    let rrem = flr(rem, internal_precision);
+    println!("Remainder");
+    println!("RREM = {rrem:.15}");
+    // TODO: Display binary
 }
 
 fn rne(x: f64, precision: i32) -> f64 {
@@ -64,7 +79,7 @@ fn flr(x: f64, precision: i32) -> f64 {
 fn to_bin(x: f64, precision: i32, radix_point_pos: i32) -> String {
     let mut s = String::new();
     if x.abs() < 2_f64.powi(-precision) {
-        for _i in (-radix_point_pos+1)..precision {
+        for _each in (-radix_point_pos+1)..precision {
             s.push('0');
         }
         return s;
