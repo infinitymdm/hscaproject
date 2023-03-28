@@ -27,10 +27,8 @@ fn main() {
     let q = n/d;
 
     // Print state
-    println!("N = {:.15}", n);
-    // TODO: Display binary
-    println!("D = {:.15}\n", d);
-    // TODO: Display binary
+    println!("N = {:.15} = {}", n, to_bin_str(n, internal_precision, 1));
+    println!("D = {:.15} = {}\n", d, to_bin_str(d, internal_precision, 1));
 
     // Perform Goldschmidt iteration
     let mut k = k0;
@@ -40,7 +38,7 @@ fn main() {
         d = flr(d*k, output_precision);
         k = flr(2.0-d, output_precision);
         println!("i = {}, N = {:.6}, R = {:.6}", i, n, k);
-        // TODO: Display binary
+        println!("i = {}, N = {}, R = {}", i, to_bin_str(n, output_precision, 2), to_bin_str(k, output_precision, 2));
     }
 
     // Actual answer
@@ -48,22 +46,22 @@ fn main() {
     // Computed answer
     let rd = flr(n, internal_precision);
 
-    println!("\nActual Answer\nRQ = {:.15}", rq);
-    // TODO: Display binary
-    println!("GDIV Answer\nRD = {:.15}\n", rd);
-    // TODO: Display binary
+    println!("\nActual Answer");
+    println!("RQ = {:.15} = {}", rq, to_bin_str(rq, internal_precision, 2));
+    println!("GDIV Answer");
+    println!("RD = {:.15} = {}", rd, to_bin_str(rd, internal_precision, 2));
 
     // Error analysis
-    println!("Error Analysis");
-    println!("error = {:.15}", (rq-rd).abs());
-    println!("#bits = {:.15}\n", (rq-rd).abs().log2());
+    println!("\nError Analysis");
+    println!("error =  {:.15}", (rq-rd).abs());
+    println!("#bits = {:.15}", (rq-rd).abs().log2());
 
     // Remainder
     let rem = 2_f64.powi(internal_precision) * (n1 - rd*d1);
     let rrem = flr(rem, internal_precision);
-    println!("Remainder");
+    println!("\nRemainder");
     println!("RREM = {rrem:.15}");
-    // TODO: Display binary
+    println!("RREM = {}\n", to_bin_str(rrem, internal_precision, 1))
 }
 
 fn rne(x: f64, precision: i32) -> f64 {
@@ -76,14 +74,31 @@ fn flr(x: f64, precision: i32) -> f64 {
     (x * scale).floor() / scale
 }
 
-fn to_bin(x: f64, precision: i32, radix_point_pos: i32) -> String {
+fn to_bin_str(x: f64, precision: i32, radix_point_pos: i32) -> String {
     let mut s = String::new();
+    let mut x = x;
     if x.abs() < 2_f64.powi(-precision) {
+        // If x is less than we can represent with the current
+        // precision, display zeros
         for _each in (-radix_point_pos+1)..precision {
             s.push('0');
         }
         return s;
-    } 
-    // TODO: come back to this later
-    s
+    } else if x < 0.0 {
+        // If x is negative, take 2's complement
+        x = 2_f64.powi(radix_point_pos) + x;
+    }
+    for i in (-radix_point_pos+1)..precision+1 {
+        let diff = 2_f64.powi(-i);
+        if x < diff {
+            s.push('0');
+        } else {
+            s.push('1');
+            x -= diff;
+        }
+        if i == 0 {
+            s.push('.');
+        }
+    }
+    return s
 }
