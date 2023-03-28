@@ -14,33 +14,27 @@ fn main() {
     let d: f64 = args.get(2).unwrap().parse().unwrap();
     let r: f64 = args.get(3).unwrap().parse().unwrap();
     let i: i32 = args.get(4).unwrap().parse().unwrap();
-    let p: f64 = args.get(5).unwrap().parse().unwrap();
-    let pf: f64 = args.get(6).unwrap().parse().unwrap();
-
-    println!("d: {d}");
-    println!("r: {r}");
-    println!("i: {i}");
-    println!("p: {p}");
-    println!("pf: {pf}");
+    let p: usize = args.get(5).unwrap().parse().unwrap();
+    let pf: usize = args.get(6).unwrap().parse().unwrap();
 
     // Adjust internal precision
-    let internal_p = p as i32;
-    let internal_pf = pf as i32;
+    let ip = p as i32;
+    let ipf = pf as i32;
 
     // Round input numbers
-    let n = rne(n, internal_pf as i32);
-    let d = rne(d, internal_pf as i32);
+    let n = rne(n, ipf);
+    let d = rne(d, ipf);
 
     // Determine actual quotient
     let q = n/d;
 
     // Print state
-    println!("n: {n}");
+    println!("N = {:.15} = 1.{:pf$b}", n, (n-1.0) as i64);
+    println!("D = {:.15} = 1.{:pf$b}", d, (d-1.0) as i64);
 
 }
 
 fn rne(x: f64, precision: i32) -> f64 {
-    let base: f64 = 2.0;
-    let scale = base.powi(precision);
-    (x * scale).floor() / scale
+    let scale = 2_f64.powi(precision);
+    (x * scale).round() / scale
 }
