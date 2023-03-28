@@ -6,6 +6,9 @@
 # Unignore Makefiles
 !Makefile
 
+# Ignore addin build dirs
+addins/*/build
+
 # Ignore ModelSim artifacts
 work/
 *.wlf
