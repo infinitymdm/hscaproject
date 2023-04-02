@@ -6,11 +6,12 @@ module tb ();
 
     initial begin
         #10;
-        dividend = 32'b00111111100000011000010111100000;
+        dividend = 32'b00111111111100110011001110011000;
         #10;
-        divisor  = 32'b00111111111010101100100001110001;
+        divisor  = 32'b00111111100000010110100110010000;
         #10;
-        $display("q = %b", quotient);
+        $display("q expected = 00111111111100001000110000011110");
+        $display("q =          %b", quotient);
     end
 
 endmodule
