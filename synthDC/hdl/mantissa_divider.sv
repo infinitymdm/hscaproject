@@ -1,16 +1,17 @@
-module mantissa_divider #(parameter WIDTH=24) (
+module mantissa_divider #(parameter WIDTH=23) (
     input  logic [WIDTH-1:0] m1, m2,
     output logic [WIDTH-1:0] m3,
     output logic decrement_exponent
 );
 
-    logic [WIDTH:0] dividend, divisor;
-    logic [WIDTH+4:0] quotient;
+    logic [2*WIDTH:0] dividend;
+    logic   [WIDTH:0] divisor;
+    logic   [WIDTH:0] quotient;
 
     // Perform division
-    assign dividend = {1'b1, m1};
+    assign dividend = {1'b1, m1, {WIDTH{1'b0}}};
     assign divisor = {1'b1, m2};
-    assign quotient = dividend / divisor;
+    assign quotient = (dividend / divisor);
 
     // Assign outputs
     assign decrement_exponent = ~quotient[WIDTH];
