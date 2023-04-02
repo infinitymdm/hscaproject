@@ -16,6 +16,8 @@ fn main() {
     let iterations: i32 = args.get(4).unwrap().parse().unwrap();
     let output_precision: i32 = args.get(5).unwrap().parse().unwrap();
     let internal_precision: i32 = args.get(6).unwrap().parse().unwrap();
+    dbg!((n as f32).to_bits());
+    dbg!((d as f32).to_bits());
 
     // Round input numbers to correct precision
     let mut n = rne(n, internal_precision);
@@ -45,6 +47,8 @@ fn main() {
     let rq = flr(q, internal_precision);
     // Computed answer
     let rd = flr(n, internal_precision);
+
+    dbg!((q as f32).to_bits());
 
     println!("\nActual Answer");
     println!("RQ = {:.15} = {}", rq, to_bin_str(rq, internal_precision, 2));
