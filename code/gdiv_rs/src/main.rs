@@ -14,46 +14,45 @@ fn main() {
     let d: f64 = args.get(2).unwrap().parse().unwrap();
     let k0: f64 = args.get(3).unwrap().parse().unwrap();
     let iterations: i32 = args.get(4).unwrap().parse().unwrap();
-    let output_precision: i32 = args.get(5).unwrap().parse().unwrap();
-    let internal_precision: i32 = args.get(6).unwrap().parse().unwrap();
-    dbg!((n as f32).to_bits());
-    dbg!((d as f32).to_bits());
+    let internal_precision: i32 = args.get(5).unwrap().parse().unwrap();
+    let external_precision: i32 = args.get(6).unwrap().parse().unwrap();
+    println!("n raw bits: {:032b}", (n as f32).to_bits());
+    println!("d raw bits: {:032b}", (d as f32).to_bits());
 
     // Round input numbers to correct precision
-    let mut n = rne(n, internal_precision);
+    let mut n = rne(n, external_precision);
     let n1 = n;
-    let mut d = rne(d, internal_precision);
+    let mut d = rne(d, external_precision);
     let d1 = d;
 
     // Determine actual quotient
     let q = n/d;
 
     // Print state
-    println!("N = {:.15} = {}", n, to_bin_str(n, internal_precision, 1));
-    println!("D = {:.15} = {}\n", d, to_bin_str(d, internal_precision, 1));
+    println!("N = {:.15} = {}", n, to_bin_str(n, external_precision, 1));
+    println!("D = {:.15} = {}\n", d, to_bin_str(d, external_precision, 1));
 
     // Perform Goldschmidt iteration
     let mut k = k0;
     for i in 0..iterations {
-        // We use output precision here because that's what would happen in hardware
-        n = flr(n*k, output_precision);
-        d = flr(d*k, output_precision);
-        k = flr(2.0-d, output_precision);
+        n = flr(n*k, internal_precision);
+        d = flr(d*k, internal_precision);
+        k = flr(2.0-d, internal_precision);
         println!("i = {}, N = {:.6}, R = {:.6}", i, n, k);
-        println!("i = {}, N = {}, R = {}", i, to_bin_str(n, output_precision, 2), to_bin_str(k, output_precision, 2));
+        println!("i = {}, N = {}, R = {}", i, to_bin_str(n, internal_precision, 2), to_bin_str(k, internal_precision, 2));
     }
 
     // Actual answer
-    let rq = flr(q, internal_precision);
+    let rq = flr(q, external_precision);
     // Computed answer
-    let rd = flr(n, internal_precision);
+    let rd = flr(n, external_precision);
 
-    dbg!((q as f32).to_bits());
+    println!("q raw bits: {:032b}", (q as f32).to_bits());
 
     println!("\nActual Answer");
-    println!("RQ = {:.15} = {}", rq, to_bin_str(rq, internal_precision, 2));
+    println!("RQ = {:.15} = {}", rq, to_bin_str(rq, external_precision, 2));
     println!("GDIV Answer");
-    println!("RD = {:.15} = {}", rd, to_bin_str(rd, internal_precision, 2));
+    println!("RD = {:.15} = {}", rd, to_bin_str(rd, external_precision, 2));
 
     // Error analysis
     println!("\nError Analysis");
@@ -61,11 +60,11 @@ fn main() {
     println!("#bits = {:.15}", (rq-rd).abs().log2());
 
     // Remainder
-    let rem = 2_f64.powi(internal_precision) * (n1 - rd*d1);
-    let rrem = flr(rem, internal_precision);
+    let rem = 2_f64.powi(external_precision) * (n1 - rd*d1);
+    let rrem = flr(rem, external_precision);
     println!("\nRemainder");
     println!("RREM = {rrem:.15}");
-    println!("RREM = {}\n", to_bin_str(rrem, internal_precision, 1))
+    println!("RREM = {}\n", to_bin_str(rrem, external_precision, 1))
 }
 
 fn rne(x: f64, precision: i32) -> f64 {
