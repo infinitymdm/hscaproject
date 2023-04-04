@@ -5,7 +5,7 @@ if [file exists work] {
 }
 vlib work
 
-vlog tb.sv fpdiv.sv f32decomp.sv mdiv.sv esub.sv
+vlog tb.sv fpdiv.sv f32utils.sv mdiv.sv esub.sv
 vsim -voptargs=+acc work.tb
 
 add wave -noupdate -divider TB
