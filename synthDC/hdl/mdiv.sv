@@ -1,4 +1,4 @@
-module mantissa_divider #(parameter WIDTH=23) (
+module mdiv #(parameter WIDTH=23) (
     input  logic [WIDTH-1:0] m1, m2,
     output logic [WIDTH-1:0] m3,
     output logic decrement_exponent
@@ -15,6 +15,6 @@ module mantissa_divider #(parameter WIDTH=23) (
 
     // Assign outputs
     assign decrement_exponent = ~quotient[WIDTH];
-    assign m3 = quotient[WIDTH] ? quotient[WIDTH-1:0] : {quotient[WIDTH-2:0], 1'b0};
+    assign m3 = quotient[WIDTH-1:0] << ~quotient[WIDTH];
 
 endmodule

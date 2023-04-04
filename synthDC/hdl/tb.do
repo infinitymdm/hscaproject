@@ -5,7 +5,7 @@ if [file exists work] {
 }
 vlib work
 
-vlog tb.sv fpdiv.sv f32decomp.sv mantissa_divider.sv exponent_subtractor.sv
+vlog tb.sv fpdiv.sv f32decomp.sv mdiv.sv esub.sv
 vsim -voptargs=+acc work.tb
 
 add wave -noupdate -divider TB

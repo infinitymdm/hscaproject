@@ -1,4 +1,4 @@
-module exponent_subtractor #(parameter WIDTH=8) (
+module esub #(parameter WIDTH=8) (
     input  logic [WIDTH-1:0] e1, e2,
     input  logic             decrement,
     output logic [WIDTH-1:0] e3
