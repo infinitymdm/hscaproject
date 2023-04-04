@@ -18,13 +18,17 @@ module tb ();
             fstatus = $fgets(line, fd); // Read in a test vector
             $display("%s", line);
             fstatus = $sscanf(line, "%8h_%8h_%8h_%2b", dividend, divisor, expected_quotient, round_mode);
+            #10;
             $write("%h | %h | %h \t ", dividend, divisor, quotient);
-            if (quotient !== expected_quotient)
+            if (quotient !== expected_quotient) begin
                 $display("Fail! Expected %h", expected_quotient);
-            else
+            end
+            else begin
                 $display("Ok");
+            end
         end
         $fclose(fd);
+        $finish;
     end
 
 endmodule

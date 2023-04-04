@@ -17,4 +17,4 @@ add wave -hex /tb/dut/*
 add wave -noupdate -divider DIV
 add wave -hex /tb/dut/div/*
 
-run 100ns
+run -all
