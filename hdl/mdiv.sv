@@ -4,14 +4,14 @@ module mdiv #(parameter WIDTH=23) (
     output logic decrement_exponent
 );
 
-    logic [2*WIDTH:0] dividend;
-    logic   [WIDTH:0] divisor;
-    logic   [WIDTH:0] quotient;
+    logic [WIDTH+4:0] dividend, divisor, quotient; // 1 leading 1, 3 gaurd bits
 
-    // Perform division
-    assign dividend = {1'b1, m1, {WIDTH{1'b0}}};
-    assign divisor = {1'b1, m2};
-    assign quotient = (dividend / divisor);
+    // Add leading 1 and 4 gaurd bits to operand mantissae
+    assign dividend = {1'b1, m1, 3'b0};
+    assign divisor = {1'b1, m2, 3'b0};
+
+    // Perform Goldschmidt iterative division
+    
 
     // Assign outputs
     assign decrement_exponent = ~quotient[WIDTH];
