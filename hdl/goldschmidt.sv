@@ -4,24 +4,27 @@ module goldschmidt_div #(parameter WIDTH=28) (
     output logic [WIDTH-1:0] quotient
 );
 
-    logic [2*WIDTH-1:0] q;
-    logic [WIDTH-1:0] n, d, k, a, b;
+    logic [2*WIDTH-1:0] j;
+    logic [WIDTH-1:0] n, d, k, a, b, c;
 
     // Generate initial approximation
     logic [WIDTH-1:0] k0 = {3'b011, {WIDTH-3{1'b0}}}; // 0.75
 
-    // mux inputs
+    // mux inputs to get operands
     mux2 #(WIDTH) kmux (mode, k0, k, b);
     mux4 #(WIDTH) stagemux ({mode, stage}, numerator, denominator, n, d, a);
 
     // multiply operands
-    assign q = a * b;
-    assign quotient = q >> WIDTH; // truncate lower bits
+    assign j = a * b;
+    assign c = j >> WIDTH-2; // Truncate lower bits, maintaining radix point position
+
+    // Output should match n
+    assign quotient = n;
 
     // register outputs to use in next iteraton
-    flopenr #(WIDTH) nreg (clk, ~stage, reset, quotient, n);
-    flopenr #(WIDTH) dreg (clk, stage, reset, quotient, d);
-    flopenr #(WIDTH) kreg (clk, stage, reset, ~quotient, k);
+    flopenr #(WIDTH) nreg (clk, ~stage, reset, c>>mode, n);
+    flopenr #(WIDTH) dreg (clk, stage, reset, c>>mode, d);
+    flopenr #(WIDTH) kreg (clk, stage, reset, (~c)+1, k);
 
 endmodule
 
@@ -34,7 +37,9 @@ module goldschmidt_ctrl (
 
     // state logic implemented using a counter
     always @(posedge clk, posedge reset)
-        if (reset | count >= 11) // reset after the 11th cycle
+        if (reset) // next cycle will be 0
+            count = 15;
+        else if (count >= 15) // reset after the 15th cycle
             count = 0;
         else
             count++;
@@ -52,11 +57,11 @@ module clk_div (
     output logic clk_out
 );
 
-    int count;
+    int count = 0;
 
     always @(posedge clk)
-        if (count < 11) begin
-            clk_out = 1; // Pulse clk_out once every 12 cycles
+        if (count < 15) begin
+            clk_out = 1; // Pulse clk_out once every 15 cycles
             count++;
         end
         else begin

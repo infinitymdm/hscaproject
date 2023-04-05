@@ -4,7 +4,7 @@ module tb ();
     int num_pass, num_fail;
     string line;
 
-    logic        clk = 0, gclk, reset;
+    logic        clk = 0, test_clk, reset;
     logic [1:0]  round_mode;
     logic [31:0] dividend, divisor, expected_quotient, quotient;
 
@@ -12,7 +12,7 @@ module tb ();
     always begin
         clk = ~clk; #5;
     end
-    clk_div clock_divider (clk, gclk);
+    clk_div clock_divider (clk, test_clk);
 
     // Initialize device under test
     fpdiv dut(clk, reset, dividend, divisor, quotient);
@@ -20,19 +20,27 @@ module tb ();
     initial begin
         // Pulse reset
         reset = 1;
-        #100;
+        #160;
         reset = 0;
 
         // Set up test parameters and table header
         num_pass = 0;
         num_fail = 0;
-        fd = $fopen("../fptests/vectors/f32_div_rne.tv", "r");
+        fd = $fopen("../fptests/vectors/f32_div_test.tv", "r");
         $display("       N |        D |        Q");
         $display("------------------------------");
     end
 
+    always @(posedge dut.div.stage)
+        if (!reset && |dut.div.gdiv.n) begin
+            $display("i");
+            $display("N = %b", dut.div.gdiv.n);
+            $display("D = %b", dut.div.gdiv.d);
+            $display("R = %b", dut.div.gdiv.k);
+        end
+
     // Apply stimulus
-    always @(posedge gclk) begin
+    always @(posedge test_clk) begin
         if (!$feof(fd)) begin
             fstatus = $fgets(line, fd); // Read in a test vector
             fstatus = $sscanf(line, "%8h_%8h_%8h_%2b", dividend, divisor, expected_quotient, round_mode);
@@ -46,16 +54,19 @@ module tb ();
     end
 
     // Check output
-    always @(negedge gclk) begin
-        $write("%h | %h | %b \t ", dividend, divisor, quotient);
-        if (quotient !== expected_quotient) begin
-            $display("Fail! Expected %b", expected_quotient);
-            num_fail++;
+    always @(negedge test_clk)
+        if (!reset) begin
+            $write("%h | %h | %h \t ", dividend, divisor, quotient);
+            if (quotient !== expected_quotient) begin
+                $display("Fail! Expected %h", expected_quotient);
+                $display("quotient: %b", quotient);
+                $display("expected: %b", expected_quotient);
+                num_fail++;
+            end
+            else begin
+                $display("Ok");
+                num_pass++;
+            end
         end
-        else begin
-            $display("Ok");
-            num_pass++;
-        end
-    end
 
 endmodule

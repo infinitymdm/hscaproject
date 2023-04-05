@@ -17,7 +17,7 @@ module mdiv #(parameter WIDTH=23) (
     goldschmidt_div gdiv(.clk, .reset, .mode, .stage, .numerator(dividend), .denominator(divisor), .quotient);
 
     // Assign outputs
-    assign decrement_exponent = ~quotient[WIDTH];
-    assign m3 = quotient[WIDTH-1:3] << ~quotient[WIDTH]; // TODO: round instead of truncating
+    assign decrement_exponent = ~quotient[WIDTH+4];
+    assign m3 = quotient[WIDTH+4:0] << ~quotient[WIDTH+4]; // TODO: round instead of truncating
 
 endmodule
