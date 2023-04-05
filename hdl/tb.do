@@ -17,4 +17,10 @@ add wave -hex /tb/dut/*
 add wave -noupdate -divider DIV
 add wave -hex /tb/dut/div/*
 
+add wave -noupdate -divider GOLDSCHMIDT_CTRL
+add wave -hex /tb/dut/div/gctrl/*
+
+add wave -noupdate -divider GOLDSCHMIDT_DIVIDER
+add wave -hex /tb/dut/div/gdiv/*
+
 run -all
