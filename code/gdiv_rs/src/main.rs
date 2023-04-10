@@ -40,9 +40,9 @@ fn main() {
         k = flr(2.0-d, internal_precision);
         //println!("i = {}, N = {:.6}, R = {:.6}", i, n, k);
         println!("i = {i}");
-        println!("N = {}", to_bin_str(n, internal_precision, 1));
-        println!("D = {}", to_bin_str(d, internal_precision, 1));
-        println!("R = {}", to_bin_str(k, internal_precision, 1));
+        println!("N = {}", to_bin_str(n, internal_precision, 2));
+        println!("D = {}", to_bin_str(d, internal_precision, 2));
+        println!("R = {}", to_bin_str(k, internal_precision, 2));
     }
 
     // Actual answer
@@ -53,9 +53,9 @@ fn main() {
     println!("q raw bits: {:032b}", (q as f32).to_bits());
 
     println!("\nActual Answer");
-    println!("RQ = {:.15} = {}", rq, to_bin_str(rq, external_precision, 1));
+    println!("RQ = {:.15} = {}", rq, to_bin_str(rq, external_precision, 2));
     println!("GDIV Answer");
-    println!("RD = {:.15} = {}", rd, to_bin_str(rd, external_precision, 1));
+    println!("RD = {:.15} = {}", rd, to_bin_str(rd, external_precision, 2));
 
     // Error analysis
     println!("\nError Analysis");

@@ -16,15 +16,15 @@ module goldschmidt_div #(parameter WIDTH=28) (
 
     // multiply operands
     assign j = a * b;
-    assign c = j >> WIDTH-2; // Truncate lower bits, maintaining radix point position
+    assign c = j >> WIDTH-2; // Truncate lower bits, keeping guard bits
 
     // Output should match n
     assign quotient = n;
 
     // register outputs to use in next iteraton
-    flopenr #(WIDTH) nreg (clk, ~stage, reset, c>>mode, n);
-    flopenr #(WIDTH) dreg (clk, stage, reset, c>>mode, d);
-    flopenr #(WIDTH) kreg (clk, stage, reset, (~c)+1, k);
+    flopenr #(WIDTH) nreg (clk, ~stage, reset, c, n);
+    flopenr #(WIDTH) dreg (clk, stage, reset, c, d);
+    flopenr #(WIDTH) kreg (clk, stage, reset, ~c, k);
 
 endmodule
 
