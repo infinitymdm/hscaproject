@@ -31,16 +31,29 @@ module tb ();
         $display("------------------------------");
     end
 
+    int i = 0;
     always @(posedge dut.div.stage)
         if (!reset && |dut.div.gdiv.n) begin
-            $display("i");
+            $display("i = %-d", i);
             $display("N = %b", dut.div.gdiv.n);
             $display("D = %b", dut.div.gdiv.d);
             $display("R = %b", dut.div.gdiv.k);
+            i++;
         end
 
-    // Apply stimulus
-    always @(posedge test_clk) begin
+    // Check output
+    always @(negedge test_clk) begin
+        if (!reset) begin
+            $write("%h | %h | %h \t ", dividend, divisor, quotient);
+            if (quotient !== expected_quotient) begin
+                $display("Fail! Expected %h", expected_quotient);
+                num_fail++;
+            end
+            else begin
+                $display("Ok");
+                num_pass++;
+            end
+        end
         if (!$feof(fd)) begin
             fstatus = $fgets(line, fd); // Read in a test vector
             fstatus = $sscanf(line, "%8h_%8h_%8h_%2b", dividend, divisor, expected_quotient, round_mode);
@@ -52,21 +65,5 @@ module tb ();
             $finish;
         end
     end
-
-    // Check output
-    always @(negedge test_clk)
-        if (!reset) begin
-            $write("%h | %h | %h \t ", dividend, divisor, quotient);
-            if (quotient !== expected_quotient) begin
-                $display("Fail! Expected %h", expected_quotient);
-                $display("quotient: %b", quotient);
-                $display("expected: %b", expected_quotient);
-                num_fail++;
-            end
-            else begin
-                $display("Ok");
-                num_pass++;
-            end
-        end
 
 endmodule

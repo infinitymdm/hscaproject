@@ -1,4 +1,4 @@
-module goldschmidt_div #(parameter WIDTH=28) (
+module goldschmidt_div #(parameter WIDTH=29) (
     input  logic             clk, reset, mode, stage,
     input  logic [WIDTH-1:0] numerator, denominator,
     output logic [WIDTH-1:0] quotient
@@ -24,7 +24,7 @@ module goldschmidt_div #(parameter WIDTH=28) (
     // register outputs to use in next iteraton
     flopenr #(WIDTH) nreg (clk, ~stage, reset, c, n);
     flopenr #(WIDTH) dreg (clk, stage, reset, c, d);
-    flopenr #(WIDTH) kreg (clk, stage, reset, ~c, k);
+    flopenr #(WIDTH) kreg (clk, stage, reset, (~c)>>1, k);
 
 endmodule
 

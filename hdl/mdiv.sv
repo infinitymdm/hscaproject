@@ -5,11 +5,11 @@ module mdiv #(parameter WIDTH=23) (
     output logic decrement_exponent
 );
 
-    logic [WIDTH+4:0] dividend, divisor, quotient; // 1 leading 1, 3 guard bits
+    logic [WIDTH+5:0] dividend, divisor, quotient; // 1 leading 1, 4 guard bits
 
-    // Add leading 1 and 3 guard bits to operand mantissae
-    assign dividend = {1'b1, m1, 3'b0};
-    assign divisor = {1'b1, m2, 3'b0};
+    // Add leading 1 and 4 guard bits to operand mantissae
+    assign dividend = {1'b1, m1, 4'b0};
+    assign divisor = {1'b1, m2, 4'b0};
 
     // Perform Goldschmidt iterative division
     logic mode, stage;
@@ -17,7 +17,9 @@ module mdiv #(parameter WIDTH=23) (
     goldschmidt_div gdiv(.clk, .reset, .mode, .stage, .numerator(dividend), .denominator(divisor), .quotient);
 
     // Assign outputs
-    assign decrement_exponent = ~quotient[WIDTH+4];
-    assign m3 = quotient[WIDTH+4:0] << ~quotient[WIDTH+4]; // TODO: round instead of truncating
+    assign decrement_exponent = ~quotient[WIDTH+5];
+    assign m3 = ~quotient[WIDTH+5] ? quotient[WIDTH+4:4] : quotient[WIDTH+5:5]; // TODO: round instead of truncating
+    always @(m3)
+        #5 $display("q_out: %b", m3);
 
 endmodule

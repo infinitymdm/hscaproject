@@ -37,7 +37,7 @@ fn main() {
     for i in 0..iterations {
         n = flr(n*k, internal_precision);
         d = flr(d*k, internal_precision);
-        k = flr(2.0-d, internal_precision);
+        k = flr(2.0-d-2_f64.powi(-internal_precision), internal_precision);
         //println!("i = {}, N = {:.6}, R = {:.6}", i, n, k);
         println!("i = {i}");
         println!("N = {}", to_bin_str(n, internal_precision, 2));
