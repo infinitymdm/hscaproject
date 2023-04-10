@@ -5,7 +5,7 @@ if [file exists work] {
 }
 vlib work
 
-vlog tb.sv fpdiv.sv f32utils.sv mdiv.sv esub.sv goldschmidt.sv mux.sv flopenr.sv
+vlog tb.sv fpdiv.sv f32utils.sv mdiv.sv esub.sv goldschmidt.sv mux.sv flopenr.sv ../Wallace/mult_cs.sv
 vsim -voptargs=+acc work.tb
 
 add wave -noupdate -divider TB

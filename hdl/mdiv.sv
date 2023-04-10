@@ -19,7 +19,5 @@ module mdiv #(parameter WIDTH=23) (
     // Assign outputs
     assign decrement_exponent = ~quotient[WIDTH+5];
     assign m3 = ~quotient[WIDTH+5] ? quotient[WIDTH+4:4] : quotient[WIDTH+5:5]; // TODO: round instead of truncating
-    always @(m3)
-        #5 $display("q_out: %b", m3);
 
 endmodule
