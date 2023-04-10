@@ -18,6 +18,8 @@ module tb ();
     fpdiv dut(clk, reset, dividend, divisor, quotient);
 
     initial begin
+        fd = $fopen("../fptests/vectors/f32_div_test.tv", "r");
+
         // Pulse reset
         reset = 1;
         #160;
@@ -26,7 +28,6 @@ module tb ();
         // Set up test parameters and table header
         num_pass = 0;
         num_fail = 0;
-        fd = $fopen("../fptests/vectors/f32_div_test.tv", "r");
         $display("       N |        D |        Q");
         $display("------------------------------");
     end
@@ -44,6 +45,7 @@ module tb ();
     // Check output
     always @(negedge test_clk) begin
         if (!reset) begin
+            #5;
             $write("%h | %h | %h \t ", dividend, divisor, quotient);
             if (quotient !== expected_quotient) begin
                 $display("Fail! Expected %h", expected_quotient);

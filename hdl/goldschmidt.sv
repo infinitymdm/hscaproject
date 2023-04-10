@@ -38,8 +38,8 @@ module goldschmidt_ctrl (
     // state logic implemented using a counter
     always @(posedge clk, posedge reset)
         if (reset) // next cycle will be 0
-            count = 15;
-        else if (count >= 15) // reset after the 15th cycle
+            count = 13;
+        else if (count >= 13) // reset after the 15th cycle
             count = 0;
         else
             count++;
@@ -60,8 +60,8 @@ module clk_div (
     int count = 0;
 
     always @(posedge clk)
-        if (count < 15) begin
-            clk_out = 1; // Pulse clk_out once every 15 cycles
+        if (count < 13) begin
+            clk_out = 1; // Pulse clk_out once every 12 cycles
             count++;
         end
         else begin
