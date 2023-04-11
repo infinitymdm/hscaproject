@@ -14,9 +14,9 @@ module mdiv #(parameter WIDTH=23) (
     assign divisor = {{LEADS-1{1'b0}}, 1'b1, m2, {GUARDS{1'b0}}};
 
     // Perform Goldschmidt iterative division
-    logic mode, stage;
-    goldschmidt_ctrl gctrl(.clk, .reset, .mode, .stage);
-    goldschmidt_div #(LEADS+WIDTH+GUARDS) gdiv(.clk, .reset, .mode, .stage, .numerator(dividend), .denominator(divisor), .quotient);
+    logic mode, stage, rem;
+    goldschmidt_ctrl gctrl(.clk, .reset, .mode, .stage, .rem);
+    goldschmidt_div #(LEADS+WIDTH+GUARDS) gdiv(.clk, .reset, .mode, .stage, .rem, .numerator(dividend), .denominator(divisor), .quotient);
 
     // Assign outputs
     assign decrement_exponent = ~quotient[LEADS+WIDTH+GUARDS-1];
