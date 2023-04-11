@@ -4,7 +4,7 @@ module tb ();
     int num_pass, num_fail;
     string line;
 
-    logic        clk = 0, test_clk, reset;
+    logic        clk = 0, reset;
     logic [1:0]  round_mode;
     logic [31:0] dividend, divisor, expected_quotient, quotient;
 
@@ -12,8 +12,6 @@ module tb ();
     always begin
         clk = ~clk; #5;
     end
-    clk_div clock_divider (clk, test_clk);
-
     // Initialize device under test
     fpdiv dut(clk, reset, dividend, divisor, quotient);
 
@@ -33,19 +31,22 @@ module tb ();
     end
 
     int i = 0;
-    always @(posedge dut.div.stage)
-        if (!reset && |dut.div.gdiv.n) begin
-            $display("i = %-d", i);
-            $display("N = %b", dut.div.gdiv.n);
-            $display("D = %b", dut.div.gdiv.d);
-            $display("R = %b", dut.div.gdiv.k);
-            i++;
+    always @(negedge clk)
+        if (!reset) begin
+            if (~dut.div.stage) begin
+                $display("i = %-d", i);
+                $display("N = %b", dut.div.gdiv.product);
+                i = (i+1) % 6;
+            end
+            else begin
+                $display("D = %b", dut.div.gdiv.product);
+                $display("R = %b", (~dut.div.gdiv.product)>>1);
+            end
         end
 
-    // Check output
-    always @(negedge test_clk) begin
-        if (!reset) begin
-            #5;
+    // Check output when starting a new operation
+    always @(negedge dut.div.mode) begin
+        if (!reset && |dividend) begin
             $write("%h | %h | %h \t ", dividend, divisor, quotient);
             if (quotient !== expected_quotient) begin
                 $display("Fail! Expected %h", expected_quotient);
