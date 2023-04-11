@@ -1,6 +1,6 @@
 module tb ();
 
-    int fd, fstatus; // file descriptor
+    int fd_in, fd_out, fstatus; // file descriptor
     int num_pass, num_fail;
     string line;
 
@@ -16,7 +16,8 @@ module tb ();
     fpdiv dut(clk, reset, dividend, divisor, quotient);
 
     initial begin
-        fd = $fopen("../fptests/vectors/f32_div_test.tv", "r");
+        fd_out = $fopen("results.txt", "w");
+        fd_in = $fopen("../fptests/vectors/f32_div_test.tv", "r");
 
         // Pulse reset
         reset = 1;
@@ -26,8 +27,8 @@ module tb ();
         // Set up test parameters and table header
         num_pass = 0;
         num_fail = 0;
-        $display("       N |        D |        Q");
-        $display("------------------------------");
+        $fdisplay(fd_out, "       N |        D |        Q");
+        $fdisplay(fd_out, "------------------------------");
     end
 
     int i = 0;
@@ -35,36 +36,37 @@ module tb ();
         if (!reset) begin
             if (~dut.div.stage) begin
                 $display("i = %-d", i);
-                $display("N = %b", dut.div.gdiv.product);
+                $display("N = %b.%b", dut.div.gdiv.product[29:28], dut.div.gdiv.product[27:0]);
                 i = (i+1) % 6;
             end
             else begin
-                $display("D = %b", dut.div.gdiv.product);
-                $display("R = %b", (~dut.div.gdiv.product)>>1);
+                $display("D = %b.%b", dut.div.gdiv.product[29:28], dut.div.gdiv.product[27:0]);
+                $display("R = %b.%b", {1'b0, ~dut.div.gdiv.product[28]}, ~dut.div.gdiv.product[27:0]);
             end
         end
 
     // Check output when starting a new operation
     always @(negedge dut.div.mode) begin
         if (!reset && |dividend) begin
-            $write("%h | %h | %h \t ", dividend, divisor, quotient);
+            $fwrite(fd_out, "%h | %h | %h \t ", dividend, divisor, quotient);
             if (quotient !== expected_quotient) begin
-                $display("Fail! Expected %h", expected_quotient);
+                $fdisplay(fd_out, "Fail! Expected %h", expected_quotient);
                 num_fail++;
             end
             else begin
-                $display("Ok");
+                $fdisplay(fd_out, "Ok");
                 num_pass++;
             end
         end
-        if (!$feof(fd)) begin
-            fstatus = $fgets(line, fd); // Read in a test vector
+        if (!$feof(fd_in)) begin
+            fstatus = $fgets(line, fd_in); // Read in a test vector
             fstatus = $sscanf(line, "%8h_%8h_%8h_%2b", dividend, divisor, expected_quotient, round_mode);
         end
         else begin
-            $fclose(fd);
-            $display("Passed: %d tests", num_pass);
-            $display("Failed: %d tests", num_fail);
+            $fclose(fd_in);
+            $fdisplay(fd_out, "Passed: %d tests", num_pass);
+            $fdisplay(fd_out, "Failed: %d tests", num_fail);
+            $fclose(fd_out);
             $finish;
         end
     end

@@ -20,3 +20,6 @@ transcript
 bin/
 target/
 *.o
+
+# Ignore test results
+hdl/results.txt

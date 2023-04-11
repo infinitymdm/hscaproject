@@ -50,8 +50,6 @@ fn main() {
     // Computed answer
     let rd = flr(n, external_precision);
 
-    println!("q raw bits: {:032b}", (q as f32).to_bits());
-
     println!("\nActual Answer");
     println!("RQ = {:.15} = {}", rq, to_bin_str(rq, external_precision, 2));
     println!("GDIV Answer");
