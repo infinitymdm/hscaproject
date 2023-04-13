@@ -64,8 +64,9 @@ fn main() {
     let rem = 2_f64.powi(external_precision) * (n1 - rd*d1);
     let rrem = flr(rem, external_precision);
     println!("\nRemainder");
+    println!("Q*D0 = {}", to_bin_str(rd*d1, external_precision, 1));
     println!("RREM = {rrem:.15}");
-    println!("RREM = {}\n", to_bin_str(rrem, external_precision, 1))
+    println!("RREM = {}\n", to_bin_str(rrem, external_precision, 1));
 }
 
 fn rne(x: f64, precision: i32) -> f64 {

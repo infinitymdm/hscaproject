@@ -45,6 +45,12 @@ module tb ();
             end
         end
 
+    always @(negedge dut.div.rem) begin
+        $display("N0   = %b", dut.div.gdiv.numerator);
+        $display("Q*D0 = %b", dut.div.gdiv.sum);
+        $display("RREM = %b\n", dut.div.gdiv.remainder);
+    end
+
     // Check output when starting a new operation
     always @(negedge dut.div.mode) begin
         if (!reset && |dividend) begin
@@ -61,6 +67,9 @@ module tb ();
         if (!$feof(fd_in)) begin
             fstatus = $fgets(line, fd_in); // Read in a test vector
             fstatus = $sscanf(line, "%8h_%8h_%8h_%2b", dividend, divisor, expected_quotient, round_mode);
+            #5;
+            $display("N = %b", dut.div.gdiv.numerator);
+            $display("D = %b\n", dut.div.gdiv.denominator);
         end
         else begin
             $fclose(fd_in);
