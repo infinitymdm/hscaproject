@@ -47,12 +47,13 @@ module tb ();
 
     always @(negedge dut.div.rem) begin
         $display("N0   = %b", dut.div.gdiv.numerator);
-        $display("Q*D0 = %b", dut.div.gdiv.sum);
+        #5;
+        $display("Q*D0 = %b", dut.div.gdiv.r);
         $display("RREM = %b\n", dut.div.gdiv.remainder);
     end
 
     // Check output when starting a new operation
-    always @(negedge dut.div.mode) begin
+    always @(negedge dut.div.rem) begin
         if (!reset && |dividend) begin
             $fwrite(fd_out, "%h | %h | %h \t ", dividend, divisor, quotient);
             if (quotient !== expected_quotient) begin
@@ -76,6 +77,7 @@ module tb ();
             $fdisplay(fd_out, "Passed: %d tests", num_pass);
             $fdisplay(fd_out, "Failed: %d tests", num_fail);
             $fclose(fd_out);
+            #5;
             $finish;
         end
     end
