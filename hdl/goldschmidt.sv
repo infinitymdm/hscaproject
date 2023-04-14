@@ -11,11 +11,11 @@ module goldschmidt_div #(parameter WIDTH=30) (
     logic [WIDTH-1:0] k0 = {3'b011, {WIDTH-3{1'b0}}}; // 0.75
 
     // mux inputs to get operands
-    mux4 #(WIDTH) kmux ({rem, mode}, k0, k, quotient, 0, b);
+    mux4 #(WIDTH) modemux ({rem, mode}, k0, k, quotient, {WIDTH{1'bz}}, b);
     mux4 #(WIDTH) stagemux ({mode, stage}, numerator, denominator, n, d, a);
 
     // multiply operands
-    mult_cs #(WIDTH) mult(a, b, 0, sum, carry);
+    mult_cs #(WIDTH) mult(a, b, {WIDTH{1'bz}}, sum, carry);
     assign product = (sum + carry);
     assign remainder = numerator - r; // Remainder calculation
 
@@ -26,7 +26,7 @@ module goldschmidt_div #(parameter WIDTH=30) (
     flopenr #(WIDTH) regn (clk, ~stage, reset, product[2*WIDTH-3:WIDTH-2], n);
     flopenr #(WIDTH) regd (clk, stage, reset, product[2*WIDTH-3:WIDTH-2], d);
     flopenr #(WIDTH) regk (clk, stage, reset, {1'b0,~product[2*WIDTH-4:WIDTH-2]}, k);
-    flopenr #(WIDTH) regr (clk, rem, reset, product[2*WIDTH-3:WIDTH-2], r);
+    flopenr #(WIDTH) regr (clk, rem, reset, {product[2*WIDTH-3:2*WIDTH-5], {WIDTH-3{1'b0}}}, r);
 
 endmodule
 
@@ -52,24 +52,5 @@ module goldschmidt_ctrl (
         mode = (count >= 2) && (count < 11);
         stage = count[0];
     end
-
-endmodule
-
-module clk_div (
-    input  logic clk,
-    output logic clk_out
-);
-
-    int count = 0;
-
-    always @(posedge clk)
-        if (count < 11) begin
-            clk_out = 1; // Pulse clk_out once every 12 cycles
-            count++;
-        end
-        else begin
-            clk_out = 0;
-            count = 0;
-        end
 
 endmodule

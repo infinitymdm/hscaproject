@@ -21,7 +21,7 @@ module tb ();
 
         // Pulse reset
         reset = 1;
-        #160;
+        #120;
         reset = 0;
 
         // Set up test parameters and table header
@@ -36,17 +36,19 @@ module tb ();
         if (!reset) begin
             if (~dut.div.stage) begin
                 $display("i = %-d", i);
-                $display("N = %b.%b", dut.div.gdiv.product[29:28], dut.div.gdiv.product[27:0]);
+                #10;
+                $display("N = %b.%b", dut.div.gdiv.n[29:28], dut.div.gdiv.n[27:0]);
                 i = (i+1) % 6;
             end
             else begin
-                $display("D = %b.%b", dut.div.gdiv.product[29:28], dut.div.gdiv.product[27:0]);
-                $display("R = %b.%b", {1'b0, ~dut.div.gdiv.product[28]}, ~dut.div.gdiv.product[27:0]);
+                #10;
+                $display("D = %b.%b", dut.div.gdiv.d[29:28], dut.div.gdiv.d[27:0]);
+                $display("R = %b.%b", dut.div.gdiv.k[29:28], dut.div.gdiv.k[27:0]);
             end
         end
 
     always @(negedge dut.div.rem) begin
-        $display("N0   = %b", dut.div.gdiv.numerator);
+        $display("\nRemainder");
         #5;
         $display("Q*D0 = %b", dut.div.gdiv.r);
         $display("RREM = %b\n", dut.div.gdiv.remainder);
