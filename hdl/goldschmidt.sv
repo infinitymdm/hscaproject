@@ -6,6 +6,7 @@ module goldschmidt_div #(parameter WIDTH=30) (
 
     logic [2*WIDTH-1:0] product, sum, carry;
     logic [WIDTH-1:0] n, d, k, a, b, r;
+    logic [WIDTH-1:0] r1, r2;
 
     // Generate initial approximation
     logic [WIDTH-1:0] k0 = {3'b011, {WIDTH-3{1'b0}}}; // 0.75
@@ -15,9 +16,11 @@ module goldschmidt_div #(parameter WIDTH=30) (
     mux4 #(WIDTH) stagemux ({mode, stage}, numerator, denominator, n, d, a);
 
     // multiply operands
-    mult_cs #(WIDTH) mult(a, b, {WIDTH{1'bz}}, sum, carry);
+    mult_cs #(WIDTH) mult(a, b, 1'b0, sum, carry);
     assign product = (sum + carry);
-    assign remainder = numerator - r; // Remainder calculation
+
+    // Calculate remainder
+    assign remainder = numerator - r;
 
     // Output should match n
     assign quotient = n;

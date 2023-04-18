@@ -48,10 +48,10 @@ module tb ();
         end
 
     always @(negedge dut.div.rem) begin
-        $display("\nRemainder");
         #5;
+        $display("\nRemainder");
         $display("Q*D0 = %b", dut.div.gdiv.r);
-        $display("RREM = %b\n", dut.div.gdiv.remainder);
+        $display("RREM = %b\n", dut.div.r);
     end
 
     // Check output when starting a new operation
