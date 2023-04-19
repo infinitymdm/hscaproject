@@ -1,7 +1,8 @@
 module goldschmidt_div #(parameter WIDTH=30) (
     input  logic             clk, reset, mode, stage, rem,
     input  logic [WIDTH-1:0] numerator, denominator,
-    output logic [WIDTH-1:0] quotient, remainder
+    output logic [WIDTH-1:0] quotient,
+    output logic             rem_sign, rem_zero
 );
 
     logic [2*WIDTH-1:0] product, sum, carry;
@@ -19,8 +20,9 @@ module goldschmidt_div #(parameter WIDTH=30) (
     mult_cs #(WIDTH) mult(a, b, 1'b0, sum, carry);
     assign product = (sum + carry);
 
-    // Calculate remainder
-    assign remainder = numerator - r;
+    // Calculate remainder info
+    assign rem_sign = r > numerator;
+    assign rem_zero = r == numerator;
 
     // Output should match n
     assign quotient = n;
