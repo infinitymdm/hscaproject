@@ -6,7 +6,7 @@ module goldschmidt_div #(parameter WIDTH=30) (
 );
 
     logic [2*WIDTH-1:0] product, sum, carry;
-    logic [WIDTH-1:0] n, d, k, a, b, r;
+    logic [WIDTH-1:0] n, d, k, a, b, qd;
     logic [WIDTH-1:0] r1, r2;
 
     // Generate initial approximation
@@ -21,8 +21,8 @@ module goldschmidt_div #(parameter WIDTH=30) (
     assign product = (sum + carry);
 
     // Calculate remainder info
-    assign rem_sign = r > numerator;
-    assign rem_zero = r == numerator;
+    assign rem_sign = qd > numerator;
+    assign rem_zero = qd == numerator;
 
     // Output should match n
     assign quotient = n;
@@ -31,7 +31,7 @@ module goldschmidt_div #(parameter WIDTH=30) (
     flopenr #(WIDTH) regn (clk, ~stage, reset, product[2*WIDTH-3:WIDTH-2], n);
     flopenr #(WIDTH) regd (clk, stage, reset, product[2*WIDTH-3:WIDTH-2], d);
     flopenr #(WIDTH) regk (clk, stage, reset, {1'b0,~product[2*WIDTH-4:WIDTH-2]}, k);
-    flopenr #(WIDTH) regr (clk, rem, reset, {product[2*WIDTH-3:2*WIDTH-5], {WIDTH-3{1'b0}}}, r);
+    flopenr #(WIDTH) regr (clk, rem, reset, {product[2*WIDTH-3:2*WIDTH-5], {WIDTH-3{1'b0}}}, qd);
 
 endmodule
 

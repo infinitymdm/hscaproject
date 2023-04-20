@@ -1,5 +1,6 @@
 module mdiv #(parameter WIDTH=23) (
     input  logic             clk, reset,
+    input  logic             round_mode,
     input  logic [WIDTH-1:0] m1, m2,
     output logic [WIDTH-1:0] m3,
     output logic decrement_exponent
@@ -7,7 +8,8 @@ module mdiv #(parameter WIDTH=23) (
     localparam LEADS = 3;
     localparam GUARDS = 4;
 
-    logic [LEADS+WIDTH+GUARDS-1:0] dividend, divisor, quotient, remainder;
+    logic [WIDTH+GUARDS-1:0] unrounded_quotient;
+    logic [LEADS+WIDTH+GUARDS-1:0] dividend, divisor, quotient;
 
     // Add leading 1 and guard bits to operand mantissae
     assign dividend = {{LEADS-1{1'b0}}, 1'b1, m1, {GUARDS{1'b0}}};
@@ -21,6 +23,11 @@ module mdiv #(parameter WIDTH=23) (
 
     // Assign outputs
     assign decrement_exponent = ~quotient[LEADS+WIDTH+GUARDS-1];
-    assign m3 = ~quotient[LEADS+WIDTH+GUARDS-1] ? quotient[WIDTH+GUARDS-1:GUARDS] : quotient[WIDTH+GUARDS:GUARDS+1]; // TODO: round instead of truncating
+    assign m3 = ~quotient[LEADS+WIDTH+GUARDS-1] ? quotient[WIDTH+GUARDS-1:0] : quotient[WIDTH+GUARDS:1]; // TODO: round instead of truncating
+
+    // Round quotient
+    round_ne #(WIDTH+GUARDS, WIDTH) rne();
+    round_z  #(WIDTH+GUARDS, WIDTH) rz ();
+    mux2 #(WIDTH) round_mux(round_mode, m3_rne, m3_rz, m3);
 
 endmodule
