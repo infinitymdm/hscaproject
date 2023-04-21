@@ -1,5 +1,5 @@
 module fpdiv (
-    input  logic        clk, reset,
+    input  logic        clk, reset, rm,
     input  logic [31:0] dividend, divisor,
     output logic [31:0] quotient
 );
@@ -16,7 +16,7 @@ module fpdiv (
 
     assign s3 = s1 ^ s2; // Determine output sign
     esub #(8) exp(.e1, .e2, .e3, .decrement(decrement_exponent)); // Calculate exponent
-    mdiv #(23) div(.clk, .reset, .m1, .m2, .m3, .decrement_exponent); // Calculate mantissa (takes 12 cycles)
+    mdiv #(23) div(.clk, .reset, .round_mode(rm), .m1, .m2, .m3, .decrement_exponent); // Calculate mantissa (takes 12 cycles)
 
     // Pack output into f32 format
     f32pack fq(s3, e3, m3, quotient);

@@ -23,11 +23,12 @@ module mdiv #(parameter WIDTH=23) (
 
     // Assign outputs
     assign decrement_exponent = ~quotient[LEADS+WIDTH+GUARDS-1];
-    assign m3 = ~quotient[LEADS+WIDTH+GUARDS-1] ? quotient[WIDTH+GUARDS-1:0] : quotient[WIDTH+GUARDS:1]; // TODO: round instead of truncating
+    assign unrounded_quotient = ~quotient[LEADS+WIDTH+GUARDS-1] ? quotient[WIDTH+GUARDS-1:0] : quotient[WIDTH+GUARDS:1];
 
     // Round quotient
-    round_ne #(WIDTH+GUARDS, WIDTH) rne();
-    round_z  #(WIDTH+GUARDS, WIDTH) rz ();
+    logic [WIDTH-1:0] m3_rne, m3_rz;
+    round_ne #(WIDTH+GUARDS, WIDTH) rne(unrounded_quotient, ~r_sign | r_zero, m3_rne);
+    round_z  #(WIDTH+GUARDS, WIDTH) rz (unrounded_quotient, r_sign, m3_rz);
     mux2 #(WIDTH) round_mux(round_mode, m3_rne, m3_rz, m3);
 
 endmodule

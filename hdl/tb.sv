@@ -5,7 +5,8 @@ module tb ();
     string line;
 
     logic        clk = 0, reset;
-    logic [1:0]  round_mode;
+    logic        round_mode;
+    logic  [1:0] op;
     logic [31:0] dividend, divisor, expected_quotient, quotient;
 
     // Initilize clk
@@ -13,11 +14,12 @@ module tb ();
         clk = ~clk; #5;
     end
     // Initialize device under test
-    fpdiv dut(clk, reset, dividend, divisor, quotient);
+    fpdiv dut(clk, reset, round_mode, dividend, divisor, quotient);
 
     initial begin
         fd_out = $fopen("results.txt", "w");
-        fd_in = $fopen("../fptests/vectors/f32_div_test.tv", "r");
+        fd_in = $fopen("../fptests/vectors/f32_div_rne.tv", "r");
+        round_mode = 0;
 
         // Pulse reset
         reset = 1;
@@ -31,24 +33,7 @@ module tb ();
         $fdisplay(fd_out, "------------------------------");
     end
 
-    int i = 0;
-    always @(negedge clk)
-        if (!reset) begin
-            if (~dut.div.stage) begin
-                $display("i = %-d", i);
-                #10;
-                $display("N = %b.%b", dut.div.gdiv.n[29:28], dut.div.gdiv.n[27:0]);
-                i = (i+1) % 6;
-            end
-            else begin
-                #10;
-                $display("D = %b.%b", dut.div.gdiv.d[29:28], dut.div.gdiv.d[27:0]);
-                $display("R = %b.%b", dut.div.gdiv.k[29:28], dut.div.gdiv.k[27:0]);
-            end
-        end
-
     always @(negedge dut.div.rem) begin
-        #5;
         $display("\nRemainder");
         $display("Sign = %b", dut.div.r_sign);
         $display("Zero = %b\n", dut.div.r_zero);
@@ -69,7 +54,7 @@ module tb ();
         end
         if (!$feof(fd_in)) begin
             fstatus = $fgets(line, fd_in); // Read in a test vector
-            fstatus = $sscanf(line, "%8h_%8h_%8h_%2b", dividend, divisor, expected_quotient, round_mode);
+            fstatus = $sscanf(line, "%8h_%8h_%8h_%2b", dividend, divisor, expected_quotient, op);
             #5;
             $display("N = %b", dut.div.gdiv.numerator);
             $display("D = %b\n", dut.div.gdiv.denominator);
