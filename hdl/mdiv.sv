@@ -18,17 +18,26 @@ module mdiv #(parameter WIDTH=23) (
     // Perform Goldschmidt iterative division
     logic mode, stage, rem;
     goldschmidt_ctrl gctrl(.clk, .reset, .mode, .stage, .rem);
-    logic r_sign, r_zero;
-    goldschmidt_div #(LEADS+WIDTH+GUARDS) gdiv(.clk, .reset, .mode, .stage, .rem, .numerator(dividend), .denominator(divisor), .quotient, .rem_sign(r_sign), .rem_zero(r_zero));
+    logic r_sign;
+    goldschmidt_div #(LEADS+WIDTH+GUARDS) gdiv(
+        .clk, .reset, .mode, .stage, .rem,
+        .numerator(dividend), .denominator(divisor), .quotient,
+        .rem_sign(r_sign));
 
-    // Assign outputs
-    assign decrement_exponent = ~quotient[LEADS+WIDTH+GUARDS-1];
-    assign unrounded_quotient = ~quotient[LEADS+WIDTH+GUARDS-1] ? quotient[WIDTH+GUARDS-1:0] : quotient[WIDTH+GUARDS:1];
+    // Order of operations: 
+    // compute Q [0.5, 2)
+    // do all 3 rounding options
+    // use remainder sign to determine which q to take
+    // shift and truncate as appropriate
 
     // Round quotient
-    logic [WIDTH-1:0] m3_rne, m3_rz;
-    round_ne #(WIDTH+GUARDS, WIDTH) rne(unrounded_quotient, ~r_sign | r_zero, m3_rne);
-    round_z  #(WIDTH+GUARDS, WIDTH) rz (unrounded_quotient, r_sign, m3_rz);
-    mux2 #(WIDTH) round_mux(round_mode, m3_rne, m3_rz, m3);
+    logic [LEADS+WIDTH+GUARDS-1:0] q_rne, q_rz, q;
+    round_ne #(LEADS+WIDTH+GUARDS, GUARDS) rne(quotient, ~r_sign, q_rne);
+    round_z  #(LEADS+WIDTH+GUARDS, GUARDS) rz (quotient, r_sign, q_rz);
+    mux2 #(LEADS+WIDTH+GUARDS) round_mux(round_mode, q_rne, q_rz, q);
+
+    // Assign outputs
+    assign decrement_exponent = ~q[WIDTH+GUARDS+1];
+    assign m3 = decrement_exponent ? q[WIDTH+GUARDS:GUARDS] : q[WIDTH+GUARDS+1:GUARDS+1];
 
 endmodule

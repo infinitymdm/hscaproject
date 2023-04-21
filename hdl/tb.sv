@@ -33,18 +33,16 @@ module tb ();
         $fdisplay(fd_out, "------------------------------");
     end
 
-    always @(negedge dut.div.rem) begin
-        $display("\nRemainder");
-        $display("Sign = %b", dut.div.r_sign);
-        $display("Zero = %b\n", dut.div.r_zero);
-    end
-
     // Check output when starting a new operation
     always @(negedge dut.div.rem) begin
         if (!reset && |dividend) begin
             $fwrite(fd_out, "%h | %h | %h \t ", dividend, divisor, quotient);
             if (quotient !== expected_quotient) begin
                 $fdisplay(fd_out, "Fail! Expected %h", expected_quotient);
+                $fdisplay(fd_out, "Expected: %b", expected_quotient);
+                $fdisplay(fd_out, "Actual:   %b", quotient);
+                $fdisplay(fd_out, "Q<1:      %b", dut.div.decrement_exponent);
+                $fdisplay(fd_out, "R<0:      %b", dut.div.r_sign);
                 num_fail++;
             end
             else begin
