@@ -2,7 +2,7 @@ module goldschmidt_div #(parameter WIDTH=30) (
     input  logic             clk, reset, mode, stage, rem,
     input  logic [WIDTH-1:0] numerator, denominator,
     output logic [WIDTH-1:0] quotient,
-    output logic             rem_sign, rem_zero
+    output logic             rem_sign
 );
 
     logic [2*WIDTH-1:0] product, sum, carry;
@@ -22,7 +22,6 @@ module goldschmidt_div #(parameter WIDTH=30) (
 
     // Calculate remainder info
     assign rem_sign = qd > numerator;
-    assign rem_zero = qd == numerator;
 
     // Output should match n
     assign quotient = n;
