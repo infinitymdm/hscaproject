@@ -19,14 +19,15 @@ module tb ();
 
     initial begin
         fd_out = $fopen("results_sqrt.txt", "w");
-        fd_in = $fopen("../fptests/vectors/f32_sqrt_rne.tv", "r");
+        fd_in = $fopen("../fptests/vectors/f32_sqrt_test.tv", "r");
         op = 2'b01;     // 00=div, 01=sqrt
         round_mode = 0; // 0=rne, 1=rz
 
         // Pulse reset
         reset = 1;
-        #160;
+        #155;
         reset = 0;
+        #5;
 
         // Set up test parameters and table header
         num_pass = 0;
@@ -35,8 +36,19 @@ module tb ();
         $fdisplay(fd_out, "-------------------");
     end
 
+    always @(negedge dut.divsqrt.enableN) begin
+        #1;
+        $display("N = %b", dut.divsqrt.goldschmidt.n);
+    end
+
+    always @(negedge dut.divsqrt.enableK) begin
+        #1;
+        $display("D = %b", dut.divsqrt.goldschmidt.d);
+        $display("K = %b", dut.divsqrt.goldschmidt.k);
+    end
+
     // Check output when starting a new operation
-    always @(negedge dut.divsqrt.sctrl.signal) begin
+    always @(posedge dut.divsqrt.sctrl.signal) begin
         if (!reset) begin
             $fwrite(fd_out, "%h | %h \t ", radicand, result);
             if (result !== expected_result) begin
@@ -53,6 +65,9 @@ module tb ();
         if (!$feof(fd_in)) begin
             fstatus = $fgets(line, fd_in); // Read in a test vector
             fstatus = $sscanf(line, "%8h_%8h_%2b", radicand, expected_result, extra);
+            $display("Fetched args");
+            $display("N0 = %b", radicand[22:0]);
+            fstatus = $fgets(line, fd_in); // Every other line isn't useful
         end
         else begin
             $fclose(fd_in);

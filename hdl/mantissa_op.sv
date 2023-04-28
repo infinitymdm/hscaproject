@@ -2,6 +2,7 @@ module mantissa_op #(parameter WIDTH=23) (
     input  logic             clk, reset,
     input  logic             round_mode,
     input  logic       [1:0] op,
+    input  logic             shift,
     input  logic [WIDTH-1:0] m1, m2,
     output logic [WIDTH-1:0] m3,
     output logic decrement_exponent
@@ -9,18 +10,21 @@ module mantissa_op #(parameter WIDTH=23) (
     localparam LEADS = 3;
     localparam GUARDS = 4;
 
-    logic [WIDTH+GUARDS-1:0] unrounded_quotient;
-    logic [LEADS+WIDTH+GUARDS-1:0] dividend, divisor, quotient;
+    logic [LEADS+WIDTH+GUARDS-1:0] n, d, quotient;
 
     // Add leading 1 and guard bits to operand mantissae
-    assign dividend = {{LEADS-1{1'b0}}, 1'b1, m1, {GUARDS{1'b0}}};
-    assign divisor = {{LEADS-1{1'b0}}, 1'b1, m2, {GUARDS{1'b0}}};
+    assign n = {{LEADS-1{1'b0}}, 1'b1, m1, {GUARDS{1'b0}}};
+    assign d = {{LEADS-1{1'b0}}, 1'b1, m2, {GUARDS{1'b0}}};
 
     // Perform Goldschmidt iterative division
-    logic [1:0] dsA, dsB, ssA, ssB, sA, sB;
-    logic dEnN, dEnD, dEnK, dEnQD, sEnN, sEnD, sEnK, sEnQD, enableN, enableD, enableK, enableQD;
+    logic [1:0] dsA, dsB;
+    logic dEnN, dEnD, dEnK, dEnQD;
     div_ctrl dctrl (clk, reset, dsA, dsB, dEnN, dEnD, dEnK, dEnQD);
+    logic [1:0] ssA, ssB;
+    logic sEnN, sEnD, sEnK, sEnQD;
     sqrt_ctrl sctrl (clk, reset, ssA, ssB, sEnN, sEnD, sEnK, sEnQD);
+    logic [1:0] sA, sB;
+    logic enableN, enableD, enableK, enableQD;
     mux2 #(8) muxCtrl (
         |op, 
         {dsA, dsB, dEnN, dEnD, dEnK, dEnQD},
@@ -32,7 +36,7 @@ module mantissa_op #(parameter WIDTH=23) (
         .op,
         .sA, .sB,
         .enableN, .enableD, .enableK, .enableQD,
-        .numerator(dividend), .denominator(divisor), .quotient,
+        .numerator(n), .denominator(d), .quotient,
         .rem_sign(r_sign));
 
     // Round quotient
@@ -43,6 +47,6 @@ module mantissa_op #(parameter WIDTH=23) (
 
     // Assign outputs
     assign decrement_exponent = ~q[WIDTH+GUARDS+1];
-    assign m3 = decrement_exponent ? q[WIDTH+GUARDS:GUARDS] : q[WIDTH+GUARDS+1:GUARDS+1];
+    assign m3 = (decrement_exponent ? q[WIDTH+GUARDS:GUARDS] : q[WIDTH+GUARDS+1:GUARDS+1]) >> shift;
 
 endmodule
