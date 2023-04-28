@@ -1,6 +1,7 @@
-module mdiv #(parameter WIDTH=23) (
+module mantissa_op #(parameter WIDTH=23) (
     input  logic             clk, reset,
     input  logic             round_mode,
+    input  logic       [1:0] op,
     input  logic [WIDTH-1:0] m1, m2,
     output logic [WIDTH-1:0] m3,
     output logic decrement_exponent
@@ -16,19 +17,16 @@ module mdiv #(parameter WIDTH=23) (
     assign divisor = {{LEADS-1{1'b0}}, 1'b1, m2, {GUARDS{1'b0}}};
 
     // Perform Goldschmidt iterative division
-    logic mode, stage, rem;
-    goldschmidt_ctrl gctrl(.clk, .reset, .mode, .stage, .rem);
+    logic [1:0] sA, sB;
+    logic enableN, enableD, enableK, enableQD;
+    div_ctrl dctrl(.clk, .reset, .sA, .sB, .enableN, .enableD, .enableK, .enableQD);
     logic r_sign;
-    goldschmidt_div #(LEADS+WIDTH+GUARDS) gdiv(
-        .clk, .reset, .mode, .stage, .rem,
+    goldschmidt #(LEADS+WIDTH+GUARDS) gdiv(
+        .clk, .reset,
+        .sA, .sB,
+        .enableN, .enableD, .enableK, .enableQD,
         .numerator(dividend), .denominator(divisor), .quotient,
         .rem_sign(r_sign));
-
-    // Order of operations: 
-    // compute Q [0.5, 2)
-    // do all 3 rounding options
-    // use remainder sign to determine which q to take
-    // shift and truncate as appropriate
 
     // Round quotient
     logic [LEADS+WIDTH+GUARDS-1:0] q_rne, q_rz, q;

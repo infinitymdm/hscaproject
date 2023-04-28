@@ -14,7 +14,7 @@ module tb ();
         clk = ~clk; #5;
     end
     // Initialize device under test
-    fpdiv dut(clk, reset, round_mode, dividend, divisor, quotient);
+    fpdiv dut(clk, reset, round_mode, op, dividend, divisor, quotient);
 
     initial begin
         fd_out = $fopen("results.txt", "w");
@@ -34,10 +34,11 @@ module tb ();
     end
 
     // Check output when starting a new operation
-    always @(negedge dut.div.rem) begin
+    always @(negedge dut.div.dctrl.rem) begin
         if (!reset && |dividend) begin
             $fwrite(fd_out, "%h | %h | %h \t ", dividend, divisor, quotient);
             if (quotient !== expected_quotient) begin
+                $display("Fail");
                 $fdisplay(fd_out, "Fail! Expected %h", expected_quotient);
                 $fdisplay(fd_out, "Expected: %b", expected_quotient);
                 $fdisplay(fd_out, "Actual:   %b", quotient);
@@ -53,9 +54,6 @@ module tb ();
         if (!$feof(fd_in)) begin
             fstatus = $fgets(line, fd_in); // Read in a test vector
             fstatus = $sscanf(line, "%8h_%8h_%8h_%2b", dividend, divisor, expected_quotient, op);
-            #5;
-            $display("N = %b", dut.div.gdiv.numerator);
-            $display("D = %b\n", dut.div.gdiv.denominator);
         end
         else begin
             $fclose(fd_in);

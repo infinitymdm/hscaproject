@@ -1,5 +1,7 @@
-module goldschmidt_div #(parameter WIDTH=30) (
-    input  logic             clk, reset, mode, stage, rem,
+module goldschmidt #(parameter WIDTH=30) (
+    input  logic             clk, reset,
+    input  logic [1:0]       sA, sB,
+    input  logic             enableN, enableD, enableK, enableQD,
     input  logic [WIDTH-1:0] numerator, denominator,
     output logic [WIDTH-1:0] quotient,
     output logic             rem_sign
@@ -13,8 +15,8 @@ module goldschmidt_div #(parameter WIDTH=30) (
     logic [WIDTH-1:0] k0 = {3'b011, {WIDTH-3{1'b0}}}; // 0.75
 
     // mux inputs to get operands
-    mux4 #(WIDTH) modemux ({rem, mode}, k0, k, quotient, {WIDTH{1'bz}}, b);
-    mux4 #(WIDTH) stagemux ({mode, stage}, numerator, denominator, n, d, a);
+    mux4 #(WIDTH) muxA (sA, k0, k, quotient, d, b);
+    mux4 #(WIDTH) muxB (sB, numerator, denominator, n, d, a);
 
     // multiply operands
     mult_cs #(WIDTH) mult(a, b, 1'b0, sum, carry);
@@ -27,19 +29,31 @@ module goldschmidt_div #(parameter WIDTH=30) (
     assign quotient = n;
 
     // register outputs to use in next iteraton
-    flopenr #(WIDTH) regn (clk, ~stage, reset, product[2*WIDTH-3:WIDTH-2], n);
-    flopenr #(WIDTH) regd (clk, stage, reset, product[2*WIDTH-3:WIDTH-2], d);
-    flopenr #(WIDTH) regk (clk, stage, reset, {1'b0,~product[2*WIDTH-4:WIDTH-2]}, k);
-    flopenr #(WIDTH) regr (clk, rem, reset, {product[2*WIDTH-3:2*WIDTH-5], {WIDTH-3{1'b0}}}, qd);
+    flopenr #(WIDTH) regN  (clk, enableN,  reset, product[2*WIDTH-3:WIDTH-2],                      n);
+    flopenr #(WIDTH) regD  (clk, enableD,  reset, product[2*WIDTH-3:WIDTH-2],                      d);
+    flopenr #(WIDTH) regK  (clk, enableK,  reset, {1'b0,~product[2*WIDTH-4:WIDTH-2]},              k);
+    flopenr #(WIDTH) regQD (clk, enableQD, reset, {product[2*WIDTH-3:2*WIDTH-5], {WIDTH-3{1'b0}}}, qd);
 
 endmodule
 
-module goldschmidt_ctrl (
-    input  logic clk, reset,
-    output logic mode, stage, rem
+module div_ctrl (
+    input  logic       clk, reset,
+    output logic [1:0] sA, sB,
+    output logic       enableN, enableD, enableK, enableQD
 );
 
     logic [3:0] count;
+    logic mode, stage, rem;
+
+    // Alias outputs for readability
+    always_comb begin
+        sA = {rem, mode};
+        sB = {mode, stage};
+        enableN = ~stage;
+        enableD = stage;
+        enableK = stage;
+        enableQD = rem;
+    end
 
     // state logic implemented using a counter
     always @(posedge clk, posedge reset)
