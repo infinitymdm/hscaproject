@@ -9,6 +9,9 @@
 # Ignore addin build dirs
 addins/*/build
 
+# Ignore generated test vectors
+fptests/vectors
+
 # Ignore ModelSim artifacts
 work/
 *.wlf
