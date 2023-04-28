@@ -10,19 +10,18 @@ module goldschmidt #(parameter WIDTH=30) (
 
     logic [2*WIDTH-1:0] product, sum, carry;
     logic [WIDTH-1:0] n, d, k, a, b, qd;
-    logic [WIDTH-1:0] r1, r2;
 
     // Generate initial approximation
     logic [WIDTH-1:0] k0;
     logic [WIDTH-1:0] dk0 = {3'b011, {WIDTH-3{1'b0}}}; // 0.75
-    logic [WIDTH-1:0] sk0 = 'b001_1011_0101_0000_0100_1111_0100_00; // approx 0.853553390593274
+    logic [WIDTH-1:0] sk0 = 'b001_1011_0101_0000_0100_1111_0011_110; // approx 0.853553390593274
     mux2 #(WIDTH) muxIA (|op, dk0, sk0, k0);
 
     // mux inputs to get operands
     logic [WIDTH-1:0] b0;
     mux4 #(WIDTH) muxA (sA, k0, k, n, d, a);
     mux4 #(WIDTH) muxB0 (sB, numerator, denominator, n, d, b0);
-    mux2 #(WIDTH) muxB1 (&sB & |op, b0, a << 3, b);
+    mux2 #(WIDTH) muxB1 (&sB & |op, b0, a << 2, b);
 
     // multiply operands
     mult_cs #(WIDTH) mult(a, b, 1'b0, sum, carry);
@@ -37,8 +36,8 @@ module goldschmidt #(parameter WIDTH=30) (
     // multiplex k register for 2-d (division) or (3-d)/2 (square root)
     logic [WIDTH-1:0] twos, threes, k_next;
     assign twos = {1'b0,~product[2*WIDTH-4:WIDTH-2]};
-    assign threes = {~product[2*WIDTH-3], product[2*WIDTH-4], ~product[2*WIDTH-5:WIDTH-2]};
-    mux2 #(WIDTH) muxK (|op, twos, threes, k_next);
+    assign threes = {product[2*WIDTH-5], ~product[2*WIDTH-6:WIDTH-2]};
+    mux4 #(WIDTH) muxK ({&sB, |op}, twos, threes, 30'bz, product[2*WIDTH-3:WIDTH-2], k_next);
 
     // register outputs to use in next iteraton
     flopenr #(WIDTH) regN  (clk, enableN,  reset, product[2*WIDTH-3:WIDTH-2],                      n);
@@ -113,28 +112,28 @@ module sqrt_ctrl (
         case (count)
             0:  begin
                     signal = 1;
-                    sA = 2'b00;
-                    sB = 2'b00;
+                    sA = 2'b00; // k0
+                    sB = 2'b00; // n0
                 end
             1:  begin
-                    sA = 2'b00;
+                    sA = 2'b00; // k0
                     sB = 2'b11; // Setting this to 11 during sqrt forces both inputs to the multiplier to use A
                 end
             2:  begin
-                    sA = 2'b10;
-                    sB = 2'b10;
+                    sA = 2'b01; // k
+                    sB = 2'b10; // d0
                 end
             3:  begin
-                    sA = 2'b01;
-                    sB = 2'b10;
+                    sA = 2'b01; // k
+                    sB = 2'b10; // n
                 end
             4:  begin
-                    sA = 2'b01;
-                    sB = 2'b11;
+                    sA = 2'b01; // k
+                    sB = 2'b11; // k
                 end
             5:  begin
-                    sA = 2'b10;
-                    sB = 2'b10;
+                    sA = 2'b01; // k
+                    sB = 2'b10; // needs to be d, which means we can't use the 11 hack ^
                 end
             3:  begin
                     sA = 2'b01;
@@ -179,8 +178,9 @@ module sqrt_ctrl (
                 end
         endcase
         case (count % 3)
+            //              ndk
             0: enables = 4'b1000;
-            1: enables = 4'b0100;
+            1: enables = 4'b0010;
             2: enables = 4'b0110;
             default: enables = 4'bxxxx;
         endcase
