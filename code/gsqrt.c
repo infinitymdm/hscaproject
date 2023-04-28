@@ -34,12 +34,20 @@ int main(int argc, char* argv[]) {
     input numbers that don't fit the precision of your registers.
   */
   Y = Y1 = N = rne(Y, iprec_f);
+  printf("D = ");
+  disp_bin(Y, 2, iprec, stdout);
+  printf("\nR = ");
+  disp_bin(R, 2, iprec, stdout);
+  printf("\n");
   /* Actual quotient */
   Q = sqrt(Y);
   printf("Y = %1.15lf = ", Y);
   disp_bin(Y, 1, iprec_f, stdout);
   printf("\n");
   for (i = 0; i < num_iter; i++) {
+    printf("R^2 = ");
+    disp_bin(R*R, 2, iprec, stdout);
+    printf("\n");
     Y = flr(Y*R*R, prec);
     N = flr(N*R, prec);
     R = flr((3 - Y)/2, prec);
