@@ -44,9 +44,11 @@ int main(int argc, char* argv[]) {
     N = flr(N*R, prec);
     R = flr((3 - Y)/2, prec);
     printf("i = %d, N = %lf, R = %lf\n", i, N, R);
-    printf("i = %d, N = ", i);
+    printf("i = %d\nN = ", i);
     disp_bin(N, 2, iprec, stdout);
-    printf(", R = ");
+    printf("\nD = ");
+    disp_bin(Y, 2, iprec, stdout);
+    printf("\nR = ");
     disp_bin(R, 2, iprec, stdout);
     printf("\n");
   }
