@@ -7,6 +7,7 @@ module tb ();
     logic        clk = 0, reset;
     logic        round_mode;
     logic  [1:0] op;
+    logic  [1:0] extra; // extra bits that I'm not sure about
     logic [31:0] dividend, divisor, expected_quotient, quotient;
 
     // Initilize clk
@@ -17,8 +18,9 @@ module tb ();
     fpdiv dut(clk, reset, round_mode, op, dividend, divisor, quotient);
 
     initial begin
-        fd_out = $fopen("results.txt", "w");
+        fd_out = $fopen("results_div.txt", "w");
         fd_in = $fopen("../fptests/vectors/f32_div_rne.tv", "r");
+        op = 2'b00;
         round_mode = 0;
 
         // Pulse reset
@@ -34,16 +36,13 @@ module tb ();
     end
 
     // Check output when starting a new operation
-    always @(negedge dut.div.dctrl.rem) begin
+    always @(negedge dut.divsqrt.dctrl.rem) begin
         if (!reset && |dividend) begin
             $fwrite(fd_out, "%h | %h | %h \t ", dividend, divisor, quotient);
             if (quotient !== expected_quotient) begin
-                $display("Fail");
                 $fdisplay(fd_out, "Fail! Expected %h", expected_quotient);
                 $fdisplay(fd_out, "Expected: %b", expected_quotient);
                 $fdisplay(fd_out, "Actual:   %b", quotient);
-                $fdisplay(fd_out, "Q<1:      %b", dut.div.decrement_exponent);
-                $fdisplay(fd_out, "R<0:      %b", dut.div.r_sign);
                 num_fail++;
             end
             else begin
@@ -53,7 +52,7 @@ module tb ();
         end
         if (!$feof(fd_in)) begin
             fstatus = $fgets(line, fd_in); // Read in a test vector
-            fstatus = $sscanf(line, "%8h_%8h_%8h_%2b", dividend, divisor, expected_quotient, op);
+            fstatus = $sscanf(line, "%8h_%8h_%8h_%2b", dividend, divisor, expected_quotient, extra);
         end
         else begin
             $fclose(fd_in);

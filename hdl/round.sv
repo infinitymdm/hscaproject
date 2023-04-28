@@ -7,10 +7,7 @@ module round_ne #(parameter WIDTH=28, ULP=4) (
 
     always_comb
         if (x[ULP-1] && rem_is_positive) begin// If the remainder is positive AND 1st guard bit is 1
-            $display("x:   %b", x);
-            $display("LSB: %b", (lsb << ULP));
             y = x + (lsb << ULP); // Add an ULP
-            $display("y:   %b", y);
         end
         else
             y = {x[WIDTH-1:ULP], {ULP{1'b0}}}; // truncate

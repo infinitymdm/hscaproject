@@ -17,12 +17,19 @@ module mantissa_op #(parameter WIDTH=23) (
     assign divisor = {{LEADS-1{1'b0}}, 1'b1, m2, {GUARDS{1'b0}}};
 
     // Perform Goldschmidt iterative division
-    logic [1:0] sA, sB;
-    logic enableN, enableD, enableK, enableQD;
-    div_ctrl dctrl(.clk, .reset, .sA, .sB, .enableN, .enableD, .enableK, .enableQD);
+    logic [1:0] dsA, dsB, ssA, ssB, sA, sB;
+    logic dEnN, dEnD, dEnK, dEnQD, sEnN, sEnD, sEnK, sEnQD, enableN, enableD, enableK, enableQD;
+    div_ctrl dctrl (clk, reset, dsA, dsB, dEnN, dEnD, dEnK, dEnQD);
+    sqrt_ctrl sctrl (clk, reset, ssA, ssB, sEnN, sEnD, sEnK, sEnQD);
+    mux2 #(8) muxCtrl (
+        |op, 
+        {dsA, dsB, dEnN, dEnD, dEnK, dEnQD},
+        {ssA, ssB, sEnN, sEnD, sEnK, sEnQD}, 
+        {sA, sB, enableN, enableD, enableK, enableQD});
     logic r_sign;
-    goldschmidt #(LEADS+WIDTH+GUARDS) gdiv(
+    goldschmidt #(LEADS+WIDTH+GUARDS) goldschmidt (
         .clk, .reset,
+        .op,
         .sA, .sB,
         .enableN, .enableD, .enableK, .enableQD,
         .numerator(dividend), .denominator(divisor), .quotient,

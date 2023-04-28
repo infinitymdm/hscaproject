@@ -17,7 +17,7 @@ module fpdiv (
 
     assign s3 = s1 ^ s2; // Determine output sign
     esub #(8) exp(.e1, .e2, .e3, .decrement(decrement_exponent)); // Calculate exponent
-    mantissa_op #(23) div(.clk, .reset, .round_mode(rm), .op, .m1, .m2, .m3, .decrement_exponent); // Calculate mantissa (takes 12 cycles)
+    mantissa_op #(23) divsqrt(.clk, .reset, .round_mode(rm), .op, .m1, .m2, .m3, .decrement_exponent); // Calculate mantissa (takes 12 cycles)
 
     // Pack output into f32 format
     f32pack fq(s3, e3, m3, result);
