@@ -18,10 +18,23 @@ module goldschmidt #(parameter WIDTH=30) (
     mux2 #(WIDTH) muxIA (|op, dk0, sk0, k0);
 
     // mux inputs to get operands
-    logic [WIDTH-1:0] b0;
-    mux4 #(WIDTH) muxA (sA, k0, k, n, d, a);
-    mux4 #(WIDTH) muxB0 (sB, numerator, denominator, n, d, b0);
-    mux2 #(WIDTH) muxB1 (&sB & |op, b0, a << 2, b);
+    always_comb begin
+        // muxA
+        case (sA)
+            0: a = k0;
+            1: a = k;
+            2: a = n;
+            default: a = {WIDTH{1'bz}};
+        endcase
+        // muxB
+        case (sB)
+            0: b = numerator;
+            1: b = denominator;
+            2: b = n;
+            3: b = d;
+            default: b = a;
+        endcase
+    end
 
     // multiply operands
     mult_cs #(WIDTH) mult(a, b, 1'b0, sum, carry);
@@ -34,10 +47,14 @@ module goldschmidt #(parameter WIDTH=30) (
     assign quotient = n;
 
     // multiplex k register for 2-d (division) or (3-d)/2 (square root)
-    logic [WIDTH-1:0] twos, threes, k_next;
-    assign twos = {1'b0,~product[2*WIDTH-4:WIDTH-2]};
-    assign threes = {product[2*WIDTH-5], ~product[2*WIDTH-6:WIDTH-2]};
-    mux4 #(WIDTH) muxK ({&sB, |op}, twos, threes, 30'bz, product[2*WIDTH-3:WIDTH-2], k_next);
+    logic [WIDTH-1:0] k_next;
+    always_comb
+        // muxK
+        case (~|op | |sB)
+            1:  k_next = {1'b0, ~product[2*WIDTH-4:WIDTH-2]};
+            0:  k_next = {2'b00, ~product[2*WIDTH-4] & ~product[2*WIDTH-5], product[2*WIDTH-5], ~product[2*WIDTH-6:WIDTH-1]};
+            default: k_next = product[2*WIDTH-3:WIDTH-2];
+        endcase
 
     // register outputs to use in next iteraton
     flopenr #(WIDTH) regN  (clk, enableN,  reset, product[2*WIDTH-3:WIDTH-2],                      n);
@@ -117,11 +134,11 @@ module sqrt_ctrl (
                 end
             1:  begin
                     sA = 2'b00; // k0
-                    sB = 2'b11; // Setting this to 11 during sqrt forces both inputs to the multiplier to use A
+                    sB = 2'bxx; // TODO: find a way to force both inputs to the multiplier to use A
                 end
             2:  begin
                     sA = 2'b01; // k
-                    sB = 2'b10; // d0
+                    sB = 2'b00; // n0
                 end
             3:  begin
                     sA = 2'b01; // k
@@ -129,52 +146,52 @@ module sqrt_ctrl (
                 end
             4:  begin
                     sA = 2'b01; // k
-                    sB = 2'b11; // k
+                    sB = 2'bxx; // k
                 end
             5:  begin
                     sA = 2'b01; // k
-                    sB = 2'b10; // needs to be d, which means we can't use the 11 hack ^
+                    sB = 2'b11; // d
                 end
-            3:  begin
-                    sA = 2'b01;
-                    sB = 2'b10;
+            6:  begin
+                    sA = 2'b01; // k
+                    sB = 2'b10; // n
                 end
-            4:  begin
-                    sA = 2'b01;
-                    sB = 2'b11;
+            7:  begin
+                    sA = 2'b01; // k
+                    sB = 2'bxx; // k
                 end
-            5:  begin
-                    sA = 2'b10;
-                    sB = 2'b10;
+            8:  begin
+                    sA = 2'b01; // k
+                    sB = 2'b11; // d
                 end
-            3:  begin
-                    sA = 2'b01;
-                    sB = 2'b10;
+            9:  begin
+                    sA = 2'b01; // k
+                    sB = 2'b10; // n
                 end
-            4:  begin
-                    sA = 2'b01;
-                    sB = 2'b11;
+            10:  begin
+                    sA = 2'b01; // k
+                    sB = 2'bxx; // k
                 end
-            5:  begin
-                    sA = 2'b10;
-                    sB = 2'b10;
+            11:  begin
+                    sA = 2'b01; // k
+                    sB = 2'b11; // d
                 end
-            3:  begin
-                    sA = 2'b01;
-                    sB = 2'b10;
+            12:  begin
+                    sA = 2'b01; // k
+                    sB = 2'b10; // n
                 end
-            4:  begin
-                    sA = 2'b01;
-                    sB = 2'b11;
+            13:  begin
+                    sA = 2'b01; // k
+                    sB = 2'bxx; // k
                 end
-            5:  begin
-                    sA = 2'b10;
-                    sB = 2'b10;
+            14:  begin
+                    sA = 2'b01; // k
+                    sB = 2'b11; // d
                 end
             15: begin
                     signal = 0;
-                    sA = 2'b01;
-                    sB = 2'b10;
+                    sA = 2'b01; // k
+                    sB = 2'b10; // n
                 end
         endcase
         case (count % 3)

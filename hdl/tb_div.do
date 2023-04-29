@@ -12,6 +12,6 @@ add wave -noupdate -divider TB
 add wave -hex /tb/dividend /tb/divisor /tb/quotient
 
 add wave -noupdate -divider GOLDSCHMIDT
-add wave -hex /tb/dut/divsqrt/*
+add wave -hex /tb/dut/divsqrt/goldschmidt/*
 
 run -all
