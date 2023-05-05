@@ -20,8 +20,8 @@ module tb ();
     initial begin
         fd_out = $fopen("results_div.txt", "w");
         fd_in = $fopen("../fptests/vectors/f32_div_rne.tv", "r");
-        op = 2'b00;
-        round_mode = 0;
+        op = 2'b00;     // 00=div, 01=sqrt
+        round_mode = 0; // 0=rne, 1=rz
 
         // Pulse reset
         reset = 1;

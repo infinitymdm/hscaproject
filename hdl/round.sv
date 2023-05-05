@@ -3,7 +3,7 @@ module round_ne #(parameter WIDTH=28, ULP=4) (
     input  logic             rem_is_positive,
     output logic [WIDTH-1:0] y
 );
-    logic [WIDTH-1:0] lsb = {{WIDTH-1{1'b0}}, 1'b1} << (ULP-1);
+    logic [WIDTH-1:0] lsb = {{WIDTH-1{1'b0}}, 1'b1} << (ULP);
 
     always_comb
         if (x[ULP-1] && rem_is_positive) begin// If the remainder is positive AND 1st guard bit is 1
@@ -19,7 +19,7 @@ module round_z #(parameter WIDTH=28, ULP=4) (
     input  logic             rem_is_negative,
     output logic [WIDTH-1:0] y
 );
-    logic [WIDTH-1:0] lsb = {{WIDTH-1{1'b0}}, 1'b1} << (ULP-1);
+    logic [WIDTH-1:0] lsb = {{WIDTH-1{1'b0}}, 1'b1} << (ULP);
 
     always_comb
         if (~x[ULP-1] && rem_is_negative) // If remainder is negative and 1st guard bit is zero
