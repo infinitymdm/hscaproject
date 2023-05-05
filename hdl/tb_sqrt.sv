@@ -41,6 +41,11 @@ module tb ();
         $display("N = %b", dut.divsqrt.goldschmidt.n);
     end
 
+    always @(posedge dut.divsqrt.enableK) begin
+        #1;
+        $display("K^2 = %b", dut.divsqrt.goldschmidt.product);
+    end
+
     always @(negedge dut.divsqrt.enableK) begin
         #1;
         $display("D = %b", dut.divsqrt.goldschmidt.d);

@@ -35,14 +35,38 @@ module tb ();
         $fdisplay(fd_out, "------------------------------");
     end
 
+    always @(negedge dut.divsqrt.enableN) begin
+        #1;
+        $display("N = %b", dut.divsqrt.goldschmidt.n);
+    end
+
+    always @(negedge dut.divsqrt.enableD) begin
+        #1;
+       $display("D = %b", dut.divsqrt.goldschmidt.d);
+    end
+
+
+    always @(negedge dut.divsqrt.enableK) begin
+        #1;
+        $display("K = %b", dut.divsqrt.goldschmidt.k);
+    end
+
+    always @(negedge dut.divsqrt.goldschmidt.enableQD) begin
+        #1;
+        $display("QD = %b", dut.divsqrt.goldschmidt.qd);
+    end
+
     // Check output when starting a new operation
     always @(negedge dut.divsqrt.dctrl.rem) begin
         if (!reset && |dividend) begin
+            #1;
             $fwrite(fd_out, "%h | %h | %h \t ", dividend, divisor, quotient);
             if (quotient !== expected_quotient) begin
                 $fdisplay(fd_out, "Fail! Expected %h", expected_quotient);
                 $fdisplay(fd_out, "Expected: %b", expected_quotient);
                 $fdisplay(fd_out, "Actual:   %b", quotient);
+                $fdisplay(fd_out, "QD: %b", dut.divsqrt.goldschmidt.qd);
+                $fdisplay(fd_out, "-R: %b", dut.divsqrt.r_sign);
                 num_fail++;
             end
             else begin
@@ -51,15 +75,20 @@ module tb ();
             end
         end
         if (!$feof(fd_in)) begin
+            #1
             fstatus = $fgets(line, fd_in); // Read in a test vector
             fstatus = $sscanf(line, "%8h_%8h_%8h_%2b", dividend, divisor, expected_quotient, extra);
+            $display("Fetched args");
+            $display("N0 = %b", dut.divsqrt.m1);
+            $display("D0 = %b", dut.divsqrt.m2);
         end
         else begin
+            #1;
             $fclose(fd_in);
             $fdisplay(fd_out, "Passed: %d tests", num_pass);
             $fdisplay(fd_out, "Failed: %d tests", num_fail);
             $fclose(fd_out);
-            #5;
+            #4;
             $finish;
         end
     end

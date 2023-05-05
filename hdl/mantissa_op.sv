@@ -7,10 +7,10 @@ module mantissa_op #(parameter WIDTH=23) (
     output logic [WIDTH-1:0] m3,
     output logic decrement_exponent
 );
-    localparam LEADS = 3;
+    localparam LEADS = 2;
     localparam GUARDS = 4;
 
-    logic [LEADS+WIDTH+GUARDS-1:0] n, d, quotient;
+    logic [LEADS+WIDTH+GUARDS-1:0] n, d, result;
 
     // Add leading 1 and guard bits to operand mantissae
     assign n = {{LEADS-1{1'b0}}, 1'b1, m1, {GUARDS{1'b0}}};
@@ -31,22 +31,22 @@ module mantissa_op #(parameter WIDTH=23) (
         {ssA, ssB, sEnN, sEnD, sEnK, sEnQD},
         {sA, sB, enableN, enableD, enableK, enableQD});
     logic r_sign;
-    goldschmidt #(LEADS+WIDTH+GUARDS) goldschmidt (
+    goldschmidt #(LEADS, WIDTH+GUARDS) goldschmidt (
         .clk, .reset,
         .op,
         .sA, .sB,
         .enableN, .enableD, .enableK, .enableQD,
-        .numerator(n), .denominator(d), .quotient,
-        .rem_sign(r_sign));
+        .n0(n), .d0(d), .result,
+        .r_sign);
 
-    // Round quotient
+    // Round result
     logic [LEADS+WIDTH+GUARDS-1:0] q_rne, q_rz, q;
-    round_ne #(LEADS+WIDTH+GUARDS, GUARDS) rne(quotient, ~r_sign, q_rne);
-    round_z  #(LEADS+WIDTH+GUARDS, GUARDS) rz (quotient, r_sign, q_rz);
+    round_ne #(LEADS+WIDTH+GUARDS, GUARDS) rne(result, ~r_sign, q_rne);
+    round_z  #(LEADS+WIDTH+GUARDS, GUARDS) rz (result, r_sign, q_rz);
     mux2 #(LEADS+WIDTH+GUARDS) round_mux(round_mode, q_rne, q_rz, q);
 
     // Assign outputs
-    assign decrement_exponent = ~q[WIDTH+GUARDS+1];
-    assign m3 = (decrement_exponent ? q[WIDTH+GUARDS:GUARDS] : q[WIDTH+GUARDS+1:GUARDS+1]) >> shift;
+    assign decrement_exponent = ~q[WIDTH+GUARDS];
+    assign m3 = decrement_exponent ? q[WIDTH+GUARDS-1:GUARDS-1] : q[WIDTH+GUARDS:GUARDS];
 
 endmodule

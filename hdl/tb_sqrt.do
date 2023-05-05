@@ -13,6 +13,9 @@ add wave /tb/dut/divsqrt/sctrl/signal
 add wave -noupdate -divider TB
 add wave -hex /tb/radicand /tb/result
 
+add wave -noupdate -divider MANTISSA_OP
+add wave -hex /tb/dut/divsqrt/*
+
 add wave -noupdate -divider GOLDSCHMIDT_DIVIDER
 add wave -hex /tb/dut/divsqrt/goldschmidt/*
 

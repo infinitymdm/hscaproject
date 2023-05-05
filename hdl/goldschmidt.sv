@@ -1,21 +1,22 @@
-module goldschmidt #(parameter WIDTH=30) (
-    input  logic             clk, reset,
-    input  logic       [1:0] op,
-    input  logic       [1:0] sA, sB,
-    input  logic             enableN, enableD, enableK, enableQD,
-    input  logic [WIDTH-1:0] numerator, denominator,
-    output logic [WIDTH-1:0] quotient,
-    output logic             rem_sign
+module goldschmidt #(parameter LEADS=2, WIDTH=28) (
+    input  logic                   clk, reset,
+    input  logic             [1:0] op,
+    input  logic             [1:0] sA, sB,
+    input  logic                   enableN, enableD, enableK, enableQD,
+    input  logic [LEADS+WIDTH-1:0] n0, d0,
+    output logic [LEADS+WIDTH-1:0] result,
+    output logic                   r_sign
 );
+    localparam SIZE = LEADS+WIDTH;
 
-    logic [2*WIDTH-1:0] product, sum, carry;
-    logic [WIDTH-1:0] n, d, k, a, b, qd;
+    logic [2*SIZE-1:0] product, sum, carry;
+    logic [SIZE-1:0] n, d, k, a, b, qd;
 
     // Generate initial approximation
-    logic [WIDTH-1:0] k0;
-    logic [WIDTH-1:0] dk0 = {3'b011, {WIDTH-3{1'b0}}}; // 0.75
-    logic [WIDTH-1:0] sk0 = 'b001_1011_0101_0000_0100_1111_0011_110; // approx 0.853553390593274
-    mux2 #(WIDTH) muxIA (|op, dk0, sk0, k0);
+    logic [SIZE-1:0] k0;
+    logic [SIZE-1:0] dk0 = {{LEADS{1'b0}}, 2'b11, {WIDTH-2{1'b0}}}; // 0.75
+    logic [SIZE-1:0] sk0 = {{LEADS{1'b0}}, 28'b0110110101000001001111001101}; // approx 0.853553390593274
+    mux2 #(SIZE) muxIA (|op, dk0, sk0, k0);
 
     // mux inputs to get operands
     always_comb begin
@@ -24,12 +25,12 @@ module goldschmidt #(parameter WIDTH=30) (
             0: a = k0;
             1: a = k;
             2: a = n;
-            default: a = {WIDTH{1'bz}};
+            default: a = {SIZE{1'bz}};
         endcase
         // muxB
         case (sB)
-            0: b = numerator;
-            1: b = denominator;
+            0: b = n0;
+            1: b = d0;
             2: b = n;
             3: b = d;
             default: b = a;
@@ -37,30 +38,30 @@ module goldschmidt #(parameter WIDTH=30) (
     end
 
     // multiply operands
-    mult_cs #(WIDTH) mult(a, b, 1'b0, sum, carry);
+    mult_cs #(SIZE) mult(a, b, 1'b0, sum, carry);
     assign product = (sum + carry);
 
     // Calculate remainder info
-    assign rem_sign = |op ? 1'b0 : qd > numerator;
+    assign r_sign = |op ? 1'b0 : qd > n0;
 
     // Output should match n
-    assign quotient = n;
+    assign result = n;
 
     // multiplex k register for 2-d (division) or (3-d)/2 (square root)
-    logic [WIDTH-1:0] k_next;
+    logic [SIZE-1:0] k_next;
     always_comb
         // muxK
         case (~|op | |sB)
-            1:  k_next = {1'b0, ~product[2*WIDTH-4:WIDTH-2]};
-            0:  k_next = {2'b00, ~product[2*WIDTH-4] & ~product[2*WIDTH-5], product[2*WIDTH-5], ~product[2*WIDTH-6:WIDTH-1]};
-            default: k_next = product[2*WIDTH-3:WIDTH-2];
+            1:  k_next = {{LEADS-1{1'b0}}, ~product[2*SIZE-LEADS-2:SIZE-LEADS]};
+            0:  k_next = {{LEADS-1{1'b0}}, ~product[2*SIZE-LEADS-2], product[2*SIZE-LEADS-2], ~product[2*SIZE-LEADS-3:SIZE-LEADS+1]};
+            default: k_next = product[2*SIZE-LEADS-1:SIZE-LEADS]; // k^2
         endcase
 
     // register outputs to use in next iteraton
-    flopenr #(WIDTH) regN  (clk, enableN,  reset, product[2*WIDTH-3:WIDTH-2],                      n);
-    flopenr #(WIDTH) regD  (clk, enableD,  reset, product[2*WIDTH-3:WIDTH-2],                      d);
-    flopenr #(WIDTH) regK  (clk, enableK,  reset, k_next,                                          k);
-    flopenr #(WIDTH) regQD (clk, enableQD, reset, {product[2*WIDTH-3:2*WIDTH-5], {WIDTH-3{1'b0}}}, qd);
+    flopenr #(SIZE) regN  (clk, enableN,  reset, product[2*SIZE-LEADS-1:SIZE-LEADS],                           n);
+    flopenr #(SIZE) regD  (clk, enableD,  reset, product[2*SIZE-LEADS-1:SIZE-LEADS],                           d);
+    flopenr #(SIZE) regK  (clk, enableK,  reset, k_next,                                                       k);
+    flopenr #(SIZE) regQD (clk, enableQD, reset, {product[2*SIZE-LEADS-1:2*SIZE-2*LEADS], {SIZE-LEADS{1'b0}}}, qd);
 
 endmodule
 
@@ -134,7 +135,7 @@ module sqrt_ctrl (
                 end
             1:  begin
                     sA = 2'b00; // k0
-                    sB = 2'bxx; // TODO: find a way to force both inputs to the multiplier to use A
+                    sB = 2'bxx; // Forces both to use a
                 end
             2:  begin
                     sA = 2'b01; // k
