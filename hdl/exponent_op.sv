@@ -10,7 +10,7 @@ module exponent_op #(parameter WIDTH=8) (
     always_comb begin
         case (op)
             00: {e, shift} = {(e1 - e2) + bias, 1'b0};
-            01: {e, shift} = {1'b0, e1 + bias};
+            01: {e, shift} = e1 + bias;
         endcase
         e3 = e - decrement;
     end

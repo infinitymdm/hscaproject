@@ -49,13 +49,17 @@ module goldschmidt #(parameter LEADS=2, WIDTH=28) (
 
     // multiplex k register for 2-d (division) or (3-d)/2 (square root)
     logic [SIZE-1:0] k_next;
-    always_comb
+    always_comb begin
         // muxK
-        case (~|op | |sB)
-            1:  k_next = {{LEADS-1{1'b0}}, ~product[2*SIZE-LEADS-2:SIZE-LEADS]};
-            0:  k_next = {{LEADS-1{1'b0}}, ~product[2*SIZE-LEADS-2], product[2*SIZE-LEADS-2], ~product[2*SIZE-LEADS-3:SIZE-LEADS+1]};
-            default: k_next = product[2*SIZE-LEADS-1:SIZE-LEADS]; // k^2
-        endcase
+        if (op == 2'b00)
+            k_next = {{LEADS-1{1'b0}}, ~product[2*SIZE-LEADS-2:SIZE-LEADS]}; // 2-D
+        else begin
+            if (sB === 2'bxx)
+                k_next = product[2*SIZE-LEADS-1:SIZE-LEADS]; // k^2
+            else
+                k_next = {{LEADS-1{1'b0}}, ~product[2*SIZE-LEADS-2], product[2*SIZE-LEADS-2], ~product[2*SIZE-LEADS-3:SIZE-LEADS+1]}; // 3-D
+        end
+    end
 
     // register outputs to use in next iteraton
     flopenr #(SIZE) regN  (clk, enableN,  reset, product[2*SIZE-LEADS-1:SIZE-LEADS],                           n);

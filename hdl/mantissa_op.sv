@@ -13,7 +13,7 @@ module mantissa_op #(parameter WIDTH=23) (
     logic [LEADS+WIDTH+GUARDS-1:0] n, d, result;
 
     // Add leading 1 and guard bits to operand mantissae
-    assign n = {{LEADS-1{1'b0}}, 1'b1, m1, {GUARDS{1'b0}}};
+    assign n = {{LEADS-1{1'b0}}, 1'b1, m1, {GUARDS{1'b0}}} << shift;
     assign d = {{LEADS-1{1'b0}}, 1'b1, m2, {GUARDS{1'b0}}};
 
     // Perform Goldschmidt iterative division
@@ -39,14 +39,15 @@ module mantissa_op #(parameter WIDTH=23) (
         .n0(n), .d0(d), .result,
         .r_sign);
 
-    // Round result
-    logic [LEADS+WIDTH+GUARDS-1:0] q_rne, q_rz, q;
-    round_ne #(LEADS+WIDTH+GUARDS, GUARDS) rne(result, ~r_sign, q_rne);
-    round_z  #(LEADS+WIDTH+GUARDS, GUARDS) rz (result, r_sign, q_rz);
-    mux2 #(LEADS+WIDTH+GUARDS) round_mux(round_mode, q_rne, q_rz, q);
+    // Accomodate for out-of-range outputs and chop off leads
+    logic [WIDTH+GUARDS-1:0] q;
+    assign decrement_exponent = ~result[WIDTH+GUARDS]; // WIDTH+GUARDS targets the 1st digit above the radix point
+    assign q = result[WIDTH+GUARDS-1:0] << decrement_exponent;
 
-    // Assign outputs
-    assign decrement_exponent = ~q[WIDTH+GUARDS];
-    assign m3 = decrement_exponent ? q[WIDTH+GUARDS-1:GUARDS-1] : q[WIDTH+GUARDS:GUARDS];
+    // Round result
+    logic [WIDTH+GUARDS-1:0] q_rne, q_rz;
+    round_ne #(WIDTH+GUARDS, GUARDS) rne(q, ~r_sign, q_rne);
+    round_z  #(WIDTH+GUARDS, GUARDS) rz (q, r_sign, q_rz);
+    mux2 #(WIDTH) round_mux(round_mode, q_rne[WIDTH+GUARDS-1:GUARDS], q_rz[WIDTH+GUARDS-1:GUARDS], m3);    
 
 endmodule

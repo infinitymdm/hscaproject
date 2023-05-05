@@ -19,7 +19,7 @@ module tb ();
 
     initial begin
         fd_out = $fopen("results_sqrt.txt", "w");
-        fd_in = $fopen("../fptests/vectors/f32_sqrt_test.tv", "r");
+        fd_in = $fopen("../fptests/vectors/f32_sqrt_rne.tv", "r");
         op = 2'b01;     // 00=div, 01=sqrt
         round_mode = 0; // 0=rne, 1=rz
 
@@ -72,7 +72,6 @@ module tb ();
             fstatus = $sscanf(line, "%8h_%8h_%2b", radicand, expected_result, extra);
             $display("Fetched args");
             $display("N0 = %b", radicand[22:0]);
-            fstatus = $fgets(line, fd_in); // Every other line isn't useful
         end
         else begin
             $fclose(fd_in);
