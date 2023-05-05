@@ -18,10 +18,10 @@ module tb ();
     fpdiv dut(clk, reset, round_mode, op, dividend, divisor, quotient);
 
     initial begin
-        fd_out = $fopen("results_div.txt", "w");
-        fd_in = $fopen("../fptests/vectors/f32_div_rne.tv", "r");
+        fd_out = $fopen("results_div_rz.txt", "w");
+        fd_in = $fopen("../fptests/vectors/f32_div_rz.tv", "r");
         op = 2'b00;     // 00=div, 01=sqrt
-        round_mode = 0; // 0=rne, 1=rz
+        round_mode = 1; // 0=rne, 1=rz
 
         // Pulse reset
         reset = 1;

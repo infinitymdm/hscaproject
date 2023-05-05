@@ -18,10 +18,10 @@ module tb ();
     fpdiv dut(clk, reset, round_mode, op, radicand, 32'b0, result);
 
     initial begin
-        fd_out = $fopen("results_sqrt.txt", "w");
-        fd_in = $fopen("../fptests/vectors/f32_sqrt_rne.tv", "r");
+        fd_out = $fopen("results_sqrt_rz.txt", "w");
+        fd_in = $fopen("../fptests/vectors/f32_sqrt_rz.tv", "r");
         op = 2'b01;     // 00=div, 01=sqrt
-        round_mode = 0; // 0=rne, 1=rz
+        round_mode = 1; // 0=rne, 1=rz
 
         // Pulse reset
         reset = 1;

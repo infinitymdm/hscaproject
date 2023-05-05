@@ -5,7 +5,7 @@ if [file exists work] {
 }
 vlib work
 
-vlog tb_sqrt.sv fpdiv.sv f32utils.sv mantissa_op.sv exponent_op.sv goldschmidt.sv round.sv mux.sv flopenr.sv ../Wallace/mult_cs.sv
+vlog tb_sqrt_rz.sv fpdiv.sv f32utils.sv mantissa_op.sv exponent_op.sv goldschmidt.sv round.sv mux.sv flopenr.sv ../Wallace/mult_cs.sv
 vsim -voptargs=+acc work.tb
 
 add wave /tb/dut/divsqrt/sctrl/signal
