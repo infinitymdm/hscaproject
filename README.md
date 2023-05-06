@@ -13,6 +13,7 @@ The files are organized as follows:
 ## Testbenches
 
 To run the provided testbenches, navigate to the `hdl` directory and run `vsim -do [testbench].do`. The provided testbench names and configurations are listed below.
+Each testbench writes internal states to the console and writes results to a corresponding file in the `hdl` directory.
 
 | File Name      | Operation   | Rounding Mode         |
 | -------------- | ----------- | --------------------- |
