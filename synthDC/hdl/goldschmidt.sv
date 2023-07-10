@@ -2,11 +2,11 @@ module goldschmidt #(parameter LEADS=2, WIDTH=28) (
     input  logic                   clk, reset,
     input  logic             [1:0] op,
     input  logic             [1:0] sA, sB,
-    input  logic                   enableN, enableD, enableK, enableQD,
+    input  logic                   enableN, enableD, enableK, enableQD, cloneA
     input  logic [LEADS+WIDTH-1:0] n0, d0,
     output logic [LEADS+WIDTH-1:0] result,
     output logic                   r_sign
-);
+    );
     localparam SIZE = LEADS+WIDTH;
 
     logic [2*SIZE-1:0] product, sum, carry;
@@ -54,7 +54,7 @@ module goldschmidt #(parameter LEADS=2, WIDTH=28) (
         if (op == 2'b00)
             k_next = {{LEADS-1{1'b0}}, ~product[2*SIZE-LEADS-2:SIZE-LEADS]}; // 2-D
         else begin
-            if (sB === 2'bxx)
+            if (cloneA)
                 k_next = product[2*SIZE-LEADS-1:SIZE-LEADS]; // k^2
             else
                 k_next = {{LEADS-1{1'b0}}, ~product[2*SIZE-LEADS-2], product[2*SIZE-LEADS-2], ~product[2*SIZE-LEADS-3:SIZE-LEADS+1]}; // 3-D
@@ -73,7 +73,7 @@ module div_ctrl (
     input  logic       clk, reset,
     output logic [1:0] sA, sB,
     output logic       enableN, enableD, enableK, enableQD
-);
+    );
 
     logic [3:0] count;
     logic mode, stage, rem;
@@ -109,8 +109,8 @@ endmodule
 module sqrt_ctrl (
     input  logic       clk, reset,
     output logic [1:0] sA, sB,
-    output logic       enableN, enableD, enableK, enableQD
-);
+    output logic       enableN, enableD, enableK, enableQD, cloneA
+    );
 
     logic [3:0] count, enables;
     logic signal; // local that just exists for the sake of timing
@@ -132,72 +132,22 @@ module sqrt_ctrl (
     // Patterns are a bit more difficult with 3 iterations
     always_comb begin
         case (count)
-            0:  begin
-                    signal = 1;
-                    sA = 2'b00; // k0
-                    sB = 2'b00; // n0
-                end
-            1:  begin
-                    sA = 2'b00; // k0
-                    sB = 2'bxx; // Forces both to use a
-                end
-            2:  begin
-                    sA = 2'b01; // k
-                    sB = 2'b00; // n0
-                end
-            3:  begin
-                    sA = 2'b01; // k
-                    sB = 2'b10; // n
-                end
-            4:  begin
-                    sA = 2'b01; // k
-                    sB = 2'bxx; // k
-                end
-            5:  begin
-                    sA = 2'b01; // k
-                    sB = 2'b11; // d
-                end
-            6:  begin
-                    sA = 2'b01; // k
-                    sB = 2'b10; // n
-                end
-            7:  begin
-                    sA = 2'b01; // k
-                    sB = 2'bxx; // k
-                end
-            8:  begin
-                    sA = 2'b01; // k
-                    sB = 2'b11; // d
-                end
-            9:  begin
-                    sA = 2'b01; // k
-                    sB = 2'b10; // n
-                end
-            10:  begin
-                    sA = 2'b01; // k
-                    sB = 2'bxx; // k
-                end
-            11:  begin
-                    sA = 2'b01; // k
-                    sB = 2'b11; // d
-                end
-            12:  begin
-                    sA = 2'b01; // k
-                    sB = 2'b10; // n
-                end
-            13:  begin
-                    sA = 2'b01; // k
-                    sB = 2'bxx; // k
-                end
-            14:  begin
-                    sA = 2'b01; // k
-                    sB = 2'b11; // d
-                end
-            15: begin
-                    signal = 0;
-                    sA = 2'b01; // k
-                    sB = 2'b10; // n
-                end
+            0:  {signal, sA, sB} = 5'b1_00_00; // k0, n0
+            1:  {cloneA, sA, sB} = 5'b1_00_00; // k0, a
+            2:  {cloneA, sA, sB} = 5'b0_01_00; // k, n0
+            3:  {cloneA, sA, sB} = 5'b0_01_10; // k, n
+            4:  {cloneA, sA, sB} = 5'b1_01_00; // k, a
+            5:  {cloneA, sA, sB} = 5'b0_01_11; // k, d
+            6:  {cloneA, sA, sB} = 5'b0_01_10; // k, n
+            7:  {cloneA, sA, sB} = 5'b1_01_00; // k, a
+            8:  {cloneA, sA, sB} = 5'b0_01_11; // k, d
+            9:  {cloneA, sA, sB} = 5'b0_01_10; // k, n
+            10: {cloneA, sA, sB} = 5'b1_01_00; // k, a
+            11: {cloneA, sA, sB} = 5'b0_01_11; // k, d
+            12: {cloneA, sA, sB} = 5'b0_01_10; // k, n
+            13: {cloneA, sA, sB} = 5'b1_01_00; // k, a
+            14: {cloneA, sA, sB} = 5'b0_01_11; // k, d
+            15: {signal, sA, sB} = 5'b0_01_10; // k, n
         endcase
         case (count % 3)
             //              ndk

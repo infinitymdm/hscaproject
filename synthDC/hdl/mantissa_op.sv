@@ -21,8 +21,8 @@ module mantissa_op #(parameter WIDTH=23) (
     logic dEnN, dEnD, dEnK, dEnQD;
     div_ctrl dctrl (clk, reset, dsA, dsB, dEnN, dEnD, dEnK, dEnQD);
     logic [1:0] ssA, ssB;
-    logic sEnN, sEnD, sEnK, sEnQD;
-    sqrt_ctrl sctrl (clk, reset, ssA, ssB, sEnN, sEnD, sEnK, sEnQD);
+    logic sEnN, sEnD, sEnK, sEnQD, cloneA;
+    sqrt_ctrl sctrl (clk, reset, ssA, ssB, sEnN, sEnD, sEnK, sEnQD, cloneA);
     logic [1:0] sA, sB;
     logic enableN, enableD, enableK, enableQD;
     mux2 #(8) muxCtrl (
@@ -35,7 +35,7 @@ module mantissa_op #(parameter WIDTH=23) (
         .clk, .reset,
         .op,
         .sA, .sB,
-        .enableN, .enableD, .enableK, .enableQD,
+        .enableN, .enableD, .enableK, .enableQD, .cloneA
         .n0(n), .d0(d), .result,
         .r_sign);
 
