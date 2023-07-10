@@ -3,7 +3,7 @@
 set CURRENT_DIR  [exec pwd]
 set search_path [list "./" ]
 
-set timing_lib /import/yukari1/pkd/SKY90
+set timing_lib /import/yukari1/pdk/SKY90/tech_files
 set s9lib $timing_lib
 lappend search_path $s9lib
 
