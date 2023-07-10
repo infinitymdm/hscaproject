@@ -25,4 +25,4 @@ target/
 *.o
 
 # Ignore test results
-hdl/results*.txt
+results*.txt

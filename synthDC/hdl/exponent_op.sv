@@ -11,7 +11,7 @@ module exponent_op #(parameter WIDTH=8) (
         case (op)
             00: {e, shift} = {(e1 - e2) + bias, 1'b0};
             01: {e, shift} = e1 + bias;
-            default: {e, shift} = {WIDTH{1'bx}}
+            default: {e, shift} = {WIDTH{1'bx}};
         endcase
 
     assign e3 = e - decrement;

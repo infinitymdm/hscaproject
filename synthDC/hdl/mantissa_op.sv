@@ -35,7 +35,7 @@ module mantissa_op #(parameter WIDTH=23) (
         .clk, .reset,
         .op,
         .sA, .sB,
-        .enableN, .enableD, .enableK, .enableQD, .cloneA
+        .enableN, .enableD, .enableK, .enableQD, .cloneA,
         .n0(n), .d0(d), .result,
         .r_sign);
 
@@ -48,6 +48,6 @@ module mantissa_op #(parameter WIDTH=23) (
     logic [WIDTH+GUARDS-1:0] q_rne, q_rz;
     round_ne #(WIDTH+GUARDS, GUARDS) rne(q, ~r_sign, q_rne);
     round_z  #(WIDTH+GUARDS, GUARDS) rz (q, r_sign, q_rz);
-    mux2 #(WIDTH) round_mux(round_mode, q_rne[WIDTH+GUARDS-1:GUARDS], q_rz[WIDTH+GUARDS-1:GUARDS], m3);    
+    mux2 #(WIDTH) round_mux(round_mode, q_rne[WIDTH+GUARDS-1:GUARDS], q_rz[WIDTH+GUARDS-1:GUARDS], m3);
 
 endmodule

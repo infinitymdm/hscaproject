@@ -2,7 +2,7 @@ module goldschmidt #(parameter LEADS=2, WIDTH=28) (
     input  logic                   clk, reset,
     input  logic             [1:0] op,
     input  logic             [1:0] sA, sB,
-    input  logic                   enableN, enableD, enableK, enableQD, cloneA
+    input  logic                   enableN, enableD, enableK, enableQD, cloneA,
     input  logic [LEADS+WIDTH-1:0] n0, d0,
     output logic [LEADS+WIDTH-1:0] result,
     output logic                   r_sign
@@ -28,7 +28,7 @@ module goldschmidt #(parameter LEADS=2, WIDTH=28) (
             default: a = {SIZE{1'bz}};
         endcase
         // muxB
-        case (sB)
+        case ({cloneA,sB})
             0: b = n0;
             1: b = d0;
             2: b = n;
