@@ -19,6 +19,13 @@ transcript
 *.vcd
 *.saif
 
+# Ignore Synopsys artifacts
+synthDC/WORK
+synthDC/default.svf
+synthDC/output
+synthDC/*.out
+synthDC/*.log
+
 # Ignore compiled objects
 bin/
 target/
