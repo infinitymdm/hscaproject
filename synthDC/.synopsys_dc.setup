@@ -25,6 +25,7 @@ set cache_read   $cache_write
 # Tell DC where to look for files
 lappend search_path ./scripts
 lappend search_path ./hdl
+lappend search_path ./hdl/Wallace
 lappend search_path ./mapped
 
 # Set up User Information
