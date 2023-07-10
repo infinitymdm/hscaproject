@@ -50,7 +50,7 @@ reset_design
 # Power Dissipation Analysis
 ######### OPTIONAL !!!!!!!!!!!!!!!!
 if { $saifpower == 1 } {
-    read_saif -input fma16.saif -instance_name tb/dut -auto_map_names -verbose
+    read_saif -input fpdiv.saif -instance_name tb/dut -auto_map_names -verbose
 }
 
 # Set reset false path
