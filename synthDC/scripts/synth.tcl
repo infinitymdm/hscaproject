@@ -13,7 +13,7 @@ suppress_message {VER-173}
 # get outputDir from environment (Makefile)
 set saifpower 1
 set maxopt 0
-set outputDir ./
+set outputDir ./output
 
 # Enables name mapping
 if { $saifpower == 1 } {
@@ -24,7 +24,7 @@ if { $saifpower == 1 } {
 set my_verilog_files [glob hdl/*]
 
 # Set toplevel
-set my_toplevel fpadd
+set my_toplevel fpdiv
 
 # Set number of significant digits
 set report_default_significant_digits 6

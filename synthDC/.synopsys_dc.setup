@@ -6,7 +6,6 @@ set search_path [list "./" ]
 set timing_lib /import/yukari1/pkd/SKY90
 set s9lib $timing_lib
 lappend search_path $s9lib
-lappend search_path ./vcd
 
 # Synthetic libraries
 set synthetic_library   [list dw_foundation.sldb]
